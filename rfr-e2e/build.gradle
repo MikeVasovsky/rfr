@@ -45,3 +45,9 @@ test {
     useJUnitPlatform()
     jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
 }
+
+tasks.register('installPlaywright', JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.microsoft.playwright.CLI'
+    args 'install', 'chromium'
+}

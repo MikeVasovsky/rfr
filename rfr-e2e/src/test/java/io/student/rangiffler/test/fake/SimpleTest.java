@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Smoke-заглушка пайплайна JUnit + Allure без браузера.
+ */
 public class SimpleTest {
 
   @Test
