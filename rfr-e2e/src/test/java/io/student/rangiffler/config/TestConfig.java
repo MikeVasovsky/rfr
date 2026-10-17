@@ -2,7 +2,7 @@ package io.student.rangiffler.config;
 
 /**
  * Конфигурация тестового окружения: базовые URL фронтенда и auth-сервера
- * (из env {@code FRONT_URL}/{@code AUTH_URL} или localhost-дефолты).
+ * из system properties {@code front.url}/{@code auth.url} или localhost-дефолты.
  */
 public final class TestConfig {
 
@@ -12,8 +12,8 @@ public final class TestConfig {
   private final String authUrl;
 
   private TestConfig() {
-    frontUrl = System.getenv().getOrDefault("FRONT_URL", "http://localhost:3001");
-    authUrl = System.getenv().getOrDefault("AUTH_URL", "http://localhost:9001");
+    frontUrl = System.getProperty("front.url", "http://localhost:3001");
+    authUrl = System.getProperty("auth.url", "http://localhost:9001");
   }
 
   public static TestConfig getInstance() {
