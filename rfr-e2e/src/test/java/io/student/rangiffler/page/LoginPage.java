@@ -7,6 +7,7 @@ import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
 import io.student.rangiffler.page.component.CredentialsForm;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static io.student.rangiffler.utils.LocatorOptions.exactRole;
 
 /**
@@ -19,11 +20,13 @@ public final class LoginPage {
   private final Page page;
   private final CredentialsForm credentialsForm;
   private final Locator signInButton;
+  private final Locator formError;
 
   public LoginPage(Page page) {
     this.page = page;
     this.credentialsForm = new CredentialsForm(page);
     this.signInButton = page.getByRole(AriaRole.BUTTON, exactRole("Sign in"));
+    this.formError = page.locator(".form__error");
   }
 
   @Step("Заполнить форму входа: {username} / {password}")
@@ -36,5 +39,17 @@ public final class LoginPage {
   public MyTravelsPage clickSignIn() {
     signInButton.click();
     return new MyTravelsPage(page);
+  }
+
+  @Step("Нажать Sign in (ожидаем ошибку)")
+  public LoginPage clickSignInExpectingError() {
+    signInButton.click();
+    return this;
+  }
+
+  @Step("Проверить ошибку формы: {expectedMessage}")
+  public LoginPage checkThatError(String expectedMessage) {
+    assertThat(formError).hasText(expectedMessage);
+    return this;
   }
 }
