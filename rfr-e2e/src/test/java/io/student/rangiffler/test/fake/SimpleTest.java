@@ -12,7 +12,7 @@ public class SimpleTest {
 
   @Test
   void simpleTest() {
-    Allure.step("Simple test", () -> {
+    Allure.step("Простой тест", () -> {
       assertEquals(2, 1 + 1);
     });
   }

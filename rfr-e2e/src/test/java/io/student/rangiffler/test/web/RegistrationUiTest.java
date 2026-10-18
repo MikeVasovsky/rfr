@@ -15,18 +15,18 @@ import org.junit.jupiter.api.Test;
 public class RegistrationUiTest extends BaseUiTest {
 
   @Test
-  @DisplayName("User can register and authorize successfully")
+  @DisplayName("Пользователь может зарегистрироваться и авторизоваться")
   void shouldRegisterAndAuthorize() {
     TestUser user = RandomDataUtils.createUser();
     String successMessage = "Congratulations! You've registered!";
 
-    Allure.step("Open landing and go to registration", () ->
+    Allure.step("Открыть лендинг и перейти к регистрации", () ->
         new LandingPage(page)
             .open()
             .clickRegister()
     );
 
-    Allure.step("Register a new user", () ->
+    Allure.step("Зарегистрировать нового пользователя", () ->
         new RegisterPage(page)
             .fillRegistrationForm(user.username(), user.password())
             .clickSignUp()
@@ -34,7 +34,7 @@ public class RegistrationUiTest extends BaseUiTest {
             .clickSignIn()
     );
 
-    Allure.step("Login with registered credentials and verify authorization", () ->
+    Allure.step("Войти с зарегистрированными данными и проверить авторизацию", () ->
         new LandingPage(page)
             .clickLogin()
             .fillLoginForm(user.username(), user.password())
