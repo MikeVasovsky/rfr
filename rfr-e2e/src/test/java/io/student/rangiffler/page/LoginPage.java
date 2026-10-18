@@ -7,6 +7,8 @@ import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
 import io.student.rangiffler.page.component.CredentialsForm;
 
+import static io.student.rangiffler.utils.LocatorOptions.exactRole;
+
 /**
  * Страница логина auth-сервера ({@code /login}) в OAuth/PKCE-потоке после нажатия Login на лендинге.
  */
@@ -21,7 +23,7 @@ public final class LoginPage {
   public LoginPage(Page page) {
     this.page = page;
     this.credentialsForm = new CredentialsForm(page);
-    this.signInButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Sign in").setExact(true));
+    this.signInButton = page.getByRole(AriaRole.BUTTON, exactRole("Sign in"));
   }
 
   @Step("Заполнить форму входа: {username} / {password}")

@@ -26,18 +26,26 @@ description: >-
 
 8. Без `checkThatOpened`, `checkPageLoaded`, `isLoaded`, `waitUntilLoaded`: `click`/`fill` ждут элемент, web-first assertions ждут состояние. URL и видимость страницы проверяем, только когда переход и есть предмет теста.
 
-9. Локаторы: `getByRole` с точным `name`, `getByLabel`, `getByPlaceholder`, `getByText` с точным совпадением, `getByTestId`. Без `first()`/`nth()`, MUI-классов и XPath; неуникальный элемент сужай родителем: `page.getByRole(AriaRole.BANNER).getByRole(…)`.
+9. Локаторы: `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText` / `getByTestId`. Без `first()`/`nth()`, MUI-классов и XPath; неуникальный элемент сужай родителем: `page.getByRole(AriaRole.BANNER).getByRole(…)`.
 
-10. Проверка не должна быть тавтологией локатора: `assertThat(heading("Travels map")).hasText("Travels map")` ничего не доказывает. Ожидаемое значение приходит из теста (`checkThatUsername(username)`).
+10. Поля ввода (`getByLabel`, и при необходимости `getByPlaceholder` / `getByRole` для combobox) — **только с полным совпадением** (`exact = true`). Кнопки, ссылки, текст — тоже с `exact`, если ищете по `name`/`text`.
 
-11. Вход только через UI; `access_token`/`id_token` в `localStorage` не подставлять (до занятия 13).
+11. Не раздувать аргументы локаторов: повторяющиеся `new Page.GetBy*Options().setExact(true)` выносить в `LocatorOptions` (`exactLabel()`, `exactRole(name)`, `exactLocatorRole(name)`, `exactText()`) и подключать static import. То же для любых часто создаваемых Options/фильтров в аргументах — отдельный метод ради читаемости.
 
-12. Без комментариев к методам и полям: смысл методов передают имена и текст `@Step`. Над каждым классом — краткий Javadoc: за что отвечает класс.
+12. Проверка не должна быть тавтологией локатора: `assertThat(heading("Travels map")).hasText("Travels map")` ничего не доказывает. Ожидаемое значение приходит из теста (`checkThatUsername(username)`).
+
+13. Вход только через UI; `access_token`/`id_token` в `localStorage` не подставлять (до занятия 13).
+
+14. Без комментариев к методам и полям: смысл методов передают имена и текст `@Step`. Над каждым классом — краткий Javadoc: за что отвечает класс.
+
+15. Группы тестов — через JUnit `@Tag` (не свои аннотации). UI-тесты наследуют `@Tag("web")` с `BaseUiTest`; не-UI заглушки — `@Tag("fake")`. Новый класс вне иерархии `BaseUiTest` помечай тегом явно. Запуск группы: `-DincludeTags=web` или `.\allure-report.ps1 -Tag web`. Допустимые теги и команды — в `rfr-e2e/README.md`; новый тег сначала добавь в README и в этот пункт skill.
 
 ## Where code lives
 
 - Config: `rfr-e2e/.../config/TestConfig.java`
 - Pages: `rfr-e2e/.../page/`
 - Components: `rfr-e2e/.../page/component/`
+- Locator helpers: `rfr-e2e/.../utils/LocatorOptions.java`
 - UI tests: `rfr-e2e/.../test/web/`
-- Browser lifecycle: `BaseUiTest`
+- Browser lifecycle: `BaseUiTest` (`@Tag("web")`)
+- Run / Allure: `rfr-e2e/README.md`, `rfr-e2e/allure-report.ps1`

@@ -6,6 +6,8 @@ import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
 
+import static io.student.rangiffler.utils.LocatorOptions.exactRole;
+
 /**
  * Лендинг фронта ({@code /}): старт сценария — переход к регистрации или OAuth-логину.
  */
@@ -19,8 +21,8 @@ public final class LandingPage {
 
   public LandingPage(Page page) {
     this.page = page;
-    this.loginButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Login").setExact(true));
-    this.registerLink = page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Register").setExact(true));
+    this.loginButton = page.getByRole(AriaRole.BUTTON, exactRole("Login"));
+    this.registerLink = page.getByRole(AriaRole.LINK, exactRole("Register"));
   }
 
   @Step("Открыть лендинг")

@@ -46,7 +46,16 @@ allure {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        def include = System.getProperty('includeTags')
+        if (include) {
+            includeTags(*(include.split(',')*.trim().findAll { it }))
+        }
+        def exclude = System.getProperty('excludeTags')
+        if (exclude) {
+            excludeTags(*(exclude.split(',')*.trim().findAll { it }))
+        }
+    }
     jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
     systemProperty 'front.url', System.getProperty('front.url', 'http://localhost:3001')
     systemProperty 'auth.url', System.getProperty('auth.url', 'http://localhost:9001')

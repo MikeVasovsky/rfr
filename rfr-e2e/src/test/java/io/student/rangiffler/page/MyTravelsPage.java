@@ -33,4 +33,9 @@ public final class MyTravelsPage {
     header.checkThatLogoutIsVisible();
     return this;
   }
+
+  @Step("Открыть профиль через шапку")
+  public ProfilePage clickProfile() {
+    return header.clickProfile();
+  }
 }

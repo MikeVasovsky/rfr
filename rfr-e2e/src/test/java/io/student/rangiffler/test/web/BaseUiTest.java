@@ -9,6 +9,7 @@ import io.student.rangiffler.config.TestConfig;
 import io.student.rangiffler.jupiter.extension.UserExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Locale;
@@ -16,6 +17,7 @@ import java.util.Locale;
 /**
  * Базовый UI-тест: поднимает и гасит Playwright-браузер и вкладку {@link Page} вокруг каждого теста.
  */
+@Tag("web")
 @ExtendWith(UserExtension.class)
 public abstract class BaseUiTest {
 

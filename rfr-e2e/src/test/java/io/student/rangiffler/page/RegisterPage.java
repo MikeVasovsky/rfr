@@ -8,6 +8,8 @@ import io.student.rangiffler.config.TestConfig;
 import io.student.rangiffler.page.component.CredentialsForm;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import static io.student.rangiffler.utils.LocatorOptions.exactRole;
+import static io.student.rangiffler.utils.LocatorOptions.exactText;
 
 /**
  * Страница регистрации auth-сервера ({@code /register}): создание пользователя и возврат на фронт.
@@ -26,8 +28,8 @@ public final class RegisterPage {
     this.page = page;
     this.credentialsForm = new CredentialsForm(page);
     this.passwordSubmitInput = page.getByPlaceholder("Repeat your password");
-    this.signUpButton = page.getByRole(AriaRole.BUTTON, new Page.GetByRoleOptions().setName("Sign up").setExact(true));
-    this.signInLink = page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName("Sign in").setExact(true));
+    this.signUpButton = page.getByRole(AriaRole.BUTTON, exactRole("Sign up"));
+    this.signInLink = page.getByRole(AriaRole.LINK, exactRole("Sign in"));
   }
 
   @Step("Заполнить форму регистрации: {username} / {password}")
@@ -45,7 +47,7 @@ public final class RegisterPage {
 
   @Step("Проверить сообщение об успешной регистрации: {expectedMessage}")
   public RegisterPage checkThatSuccessMessage(String expectedMessage) {
-    assertThat(page.getByText(expectedMessage, new Page.GetByTextOptions().setExact(true))).isVisible();
+    assertThat(page.getByText(expectedMessage, exactText())).isVisible();
     return this;
   }
 
