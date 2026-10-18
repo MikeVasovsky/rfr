@@ -23,7 +23,7 @@ public final class UserFixture implements AutoCloseable {
    * и возвращает fixture, который потом можно закрыть.
    */
   public static UserFixture create() {
-    var user = RandomDataUtils.createUser();
+    TestUser user = RandomDataUtils.createUser();
     AuthUserDao.create(user);
     return new UserFixture(user);
   }

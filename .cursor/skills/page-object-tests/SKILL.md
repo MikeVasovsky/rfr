@@ -46,6 +46,6 @@ description: >-
 - Pages: `rfr-e2e/.../page/`
 - Components: `rfr-e2e/.../page/component/`
 - Locator helpers: `rfr-e2e/.../utils/LocatorOptions.java`
-- UI tests: `rfr-e2e/.../test/web/`
+- UI tests: `rfr-e2e/.../test/{auth,profile}/` (+ `BaseUiTest` in `test/`)
 - Browser lifecycle: `BaseUiTest` (`@Tag("web")`)
 - Run / Allure: `rfr-e2e/README.md`, `rfr-e2e/allure-report.ps1`

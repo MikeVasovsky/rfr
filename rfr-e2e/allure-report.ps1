@@ -4,7 +4,7 @@
   Clears Allure history and generates a fresh report (optionally after tests).
 
 .PARAMETER Tests
-  JUnit --tests filter. Example: io.student.rangiffler.test.web.ProfileUiTest
+  JUnit --tests filter. Example: io.student.rangiffler.test.profile.ProfileTest
 
 .PARAMETER Tag
   JUnit tag(s), comma-separated -> -DincludeTags. Example: web
@@ -25,7 +25,7 @@
   .\allure-report.ps1 -Tag web
 
 .EXAMPLE
-  .\allure-report.ps1 -Tests io.student.rangiffler.test.web.ProfileUiTest
+  .\allure-report.ps1 -Tests io.student.rangiffler.test.profile.ProfileTest
 
 .EXAMPLE
   .\allure-report.ps1 -AllTests

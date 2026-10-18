@@ -6,6 +6,7 @@ import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static io.student.rangiffler.utils.LocatorOptions.exactRole;
 
 /**
@@ -28,6 +29,18 @@ public final class LandingPage {
   @Step("Открыть лендинг")
   public LandingPage open() {
     page.navigate(URL);
+    return this;
+  }
+
+  @Step("Проверить URL: {expectedUrl}")
+  public LandingPage checkThatUrl(String expectedUrl) {
+    assertThat(page).hasURL(expectedUrl);
+    return this;
+  }
+
+  @Step("Проверить, что видна кнопка Login")
+  public LandingPage checkThatLoginIsVisible() {
+    assertThat(loginButton).isVisible();
     return this;
   }
 

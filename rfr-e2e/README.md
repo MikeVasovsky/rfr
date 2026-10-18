@@ -14,10 +14,10 @@
 
 | Тег | Что входит |
 |-----|------------|
-| `web` | UI-тесты (`BaseUiTest` и наследники) |
+| `web` | UI-тесты (`BaseUiTest` и наследники в `auth` / `profile`) |
 | `fake` | Заглушка пайплайна без браузера (`SimpleTest`) |
 
-Новый UI-тест: наследуйте `BaseUiTest` (тег `web` уже на базе). Новый тег — сначала в эту таблицу и в skill PO.
+Пакеты по домену: `test.auth`, `test.profile`, база — `test.BaseUiTest`. Новый UI-тест: наследуйте `BaseUiTest` (тег `web` уже на базе). Новый тег — сначала в эту таблицу и в skill PO.
 
 ## Рекомендуемый способ (очистка + прогон + отчёт)
 
@@ -30,7 +30,7 @@ cd rfr-e2e
 .\allure-report.ps1 -Tag web
 
 # один класс
-.\allure-report.ps1 -Tests io.student.rangiffler.test.web.ProfileUiTest
+.\allure-report.ps1 -Tests io.student.rangiffler.test.profile.ProfileTest
 
 # все тесты модуля
 .\allure-report.ps1 -AllTests
@@ -68,8 +68,8 @@ cd rfr-e2e
 .\gradlew.bat :rfr-e2e:test -DexcludeTags=fake
 
 # один класс / метод
-.\gradlew.bat :rfr-e2e:test --tests "io.student.rangiffler.test.web.ProfileUiTest"
-.\gradlew.bat :rfr-e2e:test --tests "io.student.rangiffler.test.web.ProfileUiTest.shouldCreateAndPersistProfile"
+.\gradlew.bat :rfr-e2e:test --tests "io.student.rangiffler.test.profile.ProfileTest"
+.\gradlew.bat :rfr-e2e:test --tests "io.student.rangiffler.test.auth.LoginTest"
 
 # все тесты модуля
 .\gradlew.bat :rfr-e2e:test
