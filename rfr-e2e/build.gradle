@@ -57,8 +57,8 @@ test {
         }
     }
     jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
-    systemProperty 'front.url', System.getProperty('front.url', 'http://localhost:3001')
-    systemProperty 'auth.url', System.getProperty('auth.url', 'http://localhost:9001')
+    systemProperty 'rfr.frontUrl', System.getProperty('rfr.frontUrl', 'http://localhost:3001')
+    systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
 }
 
 tasks.register('installPlaywright', JavaExec) {

@@ -33,7 +33,7 @@ public class ProfileTest extends BaseUiTest {
         new ProfilePage(page)
             .open()
             .fillFirstName(FIRST_NAME)
-            .clickSaveAndWaitForUpdate()
+            .clickSave()
             .reload()
             .checkThatProfile(FIRST_NAME, "", DEFAULT_LOCATION)
     );
@@ -48,7 +48,7 @@ public class ProfileTest extends BaseUiTest {
         new ProfilePage(page)
             .open()
             .fillSurname(SURNAME)
-            .clickSaveAndWaitForUpdate()
+            .clickSave()
             .reload()
             .checkThatProfile("", SURNAME, DEFAULT_LOCATION)
     );
@@ -63,7 +63,7 @@ public class ProfileTest extends BaseUiTest {
         new ProfilePage(page)
             .open()
             .selectLocation(COUNTRY_CANADA)
-            .clickSaveAndWaitForUpdate()
+            .clickSave()
             .reload()
             .checkThatProfile("", "", COUNTRY_CANADA)
     );
@@ -78,7 +78,7 @@ public class ProfileTest extends BaseUiTest {
         new ProfilePage(page)
             .open()
             .uploadAvatar()
-            .clickSaveAndWaitForUpdate()
+            .clickSave()
             .reload()
             .checkThatAvatarIsSaved()
     );
@@ -95,7 +95,7 @@ public class ProfileTest extends BaseUiTest {
             .fillFirstName(FIRST_NAME)
             .fillSurname(SURNAME)
             .selectLocation(COUNTRY_CANADA)
-            .clickSaveAndWaitForUpdate()
+            .clickSave()
             .reload()
             .checkThatProfile(FIRST_NAME, SURNAME, COUNTRY_CANADA)
     );
@@ -119,7 +119,7 @@ public class ProfileTest extends BaseUiTest {
         new ProfilePage(page)
             .open()
             .selectLocation(COUNTRY_CANADA)
-            .clickSaveAndWaitForUpdate()
+            .clickSave()
             .reload()
             .checkThatProfile("", "", COUNTRY_CANADA)
     );
@@ -127,7 +127,7 @@ public class ProfileTest extends BaseUiTest {
     Allure.step("Сменить Location на France и проверить после reload", () ->
         new ProfilePage(page)
             .selectLocation(COUNTRY_FRANCE)
-            .clickSaveAndWaitForUpdate()
+            .clickSave()
             .reload()
             .checkThatProfile("", "", COUNTRY_FRANCE)
     );

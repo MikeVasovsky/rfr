@@ -96,14 +96,8 @@ public final class ProfilePage {
     return this;
   }
 
-  @Step("Нажать Save")
-  public ProfilePage clickSave() {
-    saveButton.click();
-    return this;
-  }
-
   @Step("Нажать Save и дождаться UpdateUser")
-  public ProfilePage clickSaveAndWaitForUpdate() {
+  public ProfilePage clickSave() {
     page.waitForResponse(
         response -> {
           String postData = response.request().postData();
@@ -113,6 +107,12 @@ public final class ProfilePage {
         },
         saveButton::click
     );
+    return this;
+  }
+
+  @Step("Нажать Save без ожидания UpdateUser")
+  public ProfilePage clickSaveWithoutWaitingForUpdate() {
+    saveButton.click();
     return this;
   }
 
