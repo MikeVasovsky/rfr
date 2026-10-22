@@ -2,8 +2,11 @@
 
 ```bash
 ./gradlew :rfr-e2e:installPlaywright
-./gradlew :rfr-e2e:test
+./gradlew runE2e
+# эквивалент: ./gradlew :rfr-e2e:test
 ```
+
+Пока `runE2e` гоняет **все** тесты модуля `rfr-e2e`. Фильтры по тегам — `-DincludeTags` / `-DexcludeTags` (см. `README.md`).
 
 ## Конфигурация
 

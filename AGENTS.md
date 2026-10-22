@@ -153,6 +153,10 @@ DGS Codegen генерирует типы в `io.student.rangiffler.model.types`
 
 Архитектура, запуск, Page Object, фикстуры, теги — `rfr-e2e/AGENTS.md`. Подробности — `rfr-e2e/README.md`.
 
+```bash
+./gradlew runE2e
+```
+
 ## Conventions for agents
 
 - Порядок старта: MySQL → auth → api → frontend.
