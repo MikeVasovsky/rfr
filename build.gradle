@@ -43,3 +43,9 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs.add('-parameters')
 }
+
+tasks.register('runAll') {
+    group = 'application'
+    description = 'Run rfr-auth and rfr-api (use with --parallel)'
+    dependsOn ':rfr-auth:bootRun', ':rfr-api:bootRun'
+}

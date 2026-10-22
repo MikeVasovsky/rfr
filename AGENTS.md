@@ -22,7 +22,8 @@ rfr/
 ├── rfr-api/          # GraphQL API: users/countries/friendship real; feed/photos mock
 ├── rfr-gql-client/   # React SPA (готов)
 ├── rfr-e2e/          # E2E заготовка (JUnit 6 + Playwright + Allure 3)
-├── localenv.sh       # MySQL в Docker (ОПАСНО: удаляет ВСЕ контейнеры)
+├── docker-compose.yml # MySQL
+├── localenv.sh       # поднять MySQL через compose
 └── ports.sh          # освободить порты (Unix/lsof)
 ```
 
@@ -61,13 +62,10 @@ OIDC discovery: http://localhost:9001/.well-known/openid-configuration
 
 ### MySQL
 
-Предпочтительно без `localenv.sh` (скрипт делает `docker stop/rm` **всех** контейнеров на машине):
-
 ```bash
-docker run --name rfr-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secret -v mysql-volume:/var/lib/mysql -d mysql:8.4.7
+./localenv.sh
+# или: docker compose up mysql --wait
 ```
-
-Если контейнер уже есть: `docker start rfr-mysql`.
 
 Credentials: user `root`, password `secret`.  
 Schemas: `rangiffler-auth`, `rangiffler-api` (создаются JDBC `createDatabaseIfNotExist=true` + Flyway).
@@ -75,22 +73,17 @@ Schemas: `rangiffler-auth`, `rangiffler-api` (создаются JDBC `createDat
 Windows: если `docker` не в PATH, CLI часто лежит в  
 `%LOCALAPPDATA%\Programs\DockerDesktop\resources\bin\docker.exe`.
 
-### rfr-auth
+### Backend (auth + api)
+
+Одной командой (нужен **`--parallel`**, иначе второй `bootRun` не стартанёт):
 
 ```bash
-cd rfr-auth && ../gradlew bootRun
-# Windows: ..\gradlew.bat bootRun
+./gradlew runAll --parallel
+# Windows: .\gradlew.bat runAll --parallel
 ```
 
-Main: `io.student.rangiffler.RangifflerAuthApplication`
-
-### rfr-api
-
-```bash
-cd rfr-api && ../gradlew bootRun
-```
-
-Main: `io.student.rangiffler.RangifflerApiApplication`
+По отдельности: `./gradlew :rfr-auth:bootRun` / `./gradlew :rfr-api:bootRun`.  
+Main: `RangifflerAuthApplication` (9001), `RangifflerApiApplication` (8081).
 
 ### Frontend
 
@@ -158,16 +151,10 @@ DGS Codegen генерирует типы в `io.student.rangiffler.model.types`
 
 ## E2E
 
-Архитектура пакетов, Page Object, фикстуры, теги — `rfr-e2e/AGENTS.md`. Запуск и детали — `rfr-e2e/README.md`.
-
-```bash
-./gradlew :rfr-e2e:installPlaywright
-./gradlew :rfr-e2e:test
-```
+Архитектура, запуск, Page Object, фикстуры, теги — `rfr-e2e/AGENTS.md`. Подробности — `rfr-e2e/README.md`.
 
 ## Conventions for agents
 
-- Не запускать `localenv.sh` без явной просьбы — он сносит все Docker-контейнеры.
 - Порядок старта: MySQL → auth → api → frontend.
 - GraphQL-модели не редактировать вручную — менять `query.graphqls` и codegen.
 - Spring Boot 4 / Jackson 3: `tools.jackson.databind.*`, не legacy `com.fasterxml...` для нового кода.

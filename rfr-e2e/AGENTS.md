@@ -1,3 +1,10 @@
+## Запуск
+
+```bash
+./gradlew :rfr-e2e:installPlaywright
+./gradlew :rfr-e2e:test
+```
+
 ## Конфигурация
 
 Настройки тестов — `TestConfig`: `-Drfr.<ключ>=…` или переменная `RFR_<КЛЮЧ>`, иначе значение по умолчанию. Подробности запуска и тегов — `README.md` в этом модуле.
@@ -27,4 +34,4 @@
 - Вход в тестах только через UI; токены в `localStorage` не подставлять.
 - Проход сценария через Playwright MCP — не запуск теста. Успех подтверждается JUnit-прогоном через Gradle (`README.md`, `allure-report.ps1`).
 - Тестовые данные создаются и удаляются фикстурами (`@User` → `UserExtension` → `UserFixture`), без широких `DELETE`/`TRUNCATE`.
-- Группы тестов — JUnit `@Tag`: UI наследуют `web` с `BaseUiTest`, заглушки — `fake`. Новый тег сначала в `README.md` и в skill.
+- Группы тестов — JUnit `@Tag`: UI наследуют `web` с `BaseUiTest`, заглушки — `fake`. Полный список и фильтры — `README.md`. Новый тег сначала в README и в skill.
