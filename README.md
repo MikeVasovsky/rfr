@@ -119,6 +119,37 @@ npm run dev
 Mock контроллеры в rfr-api будут возвращать статические данные из JSON файлов для ленты фотографий.
 Реальная работа с пользователями и странами уже реализована через базу данных.
 
+### Быстрый старт (короткие команды)
+
+Пошаговый запуск выше можно сократить. Отдельного скрипта «только поднять весь стенд по очереди и выйти» нет — есть ярлыки Gradle и compose.
+
+**Стенд для ручной работы** (нужны Docker Desktop и Node/npm в PATH):
+
+```bash
+./localenv.sh                                    # MySQL (docker compose up mysql --wait)
+./gradlew runAll --parallel                      # rfr-auth (:9001) + rfr-api (:8081) одновременно
+# Windows: .\gradlew.bat runAll --parallel
+cd rfr-gql-client && npm i && npm run dev        # фронт :3001
+```
+
+`--parallel` обязателен: без него второй `bootRun` не стартует. MySQL и фронт в `runAll` не входят.
+
+**E2E одной командой** (поднять стек, оставить его работать, прогнать тесты):
+
+```bash
+./gradlew e2eStack
+# Windows: .\gradlew.bat e2eStack
+```
+
+Нужны Docker Desktop и Node/npm. Логи фоновых процессов — в `build/e2eStack/`.
+
+**Только тесты**, если стек уже поднят:
+
+```bash
+./gradlew :rfr-e2e:installPlaywright   # браузер Chromium, один раз
+./gradlew runE2e                       # всегда перезапускает suite (UP-TO-DATE отключён)
+```
+
 
 # Что дальше?
 
