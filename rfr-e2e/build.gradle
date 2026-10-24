@@ -46,6 +46,8 @@ allure {
 }
 
 test {
+    // E2E against a live stack — always re-run (Gradle UP-TO-DATE would skip with no code changes).
+    outputs.upToDateWhen { false }
     useJUnitPlatform {
         def include = System.getProperty('includeTags')
         if (include) {

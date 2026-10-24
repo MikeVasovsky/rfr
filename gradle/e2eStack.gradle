@@ -1,5 +1,4 @@
-import java.net.InetSocketAddress
-import java.net.Socket
+
 
 /**
  * Cross-platform stack + e2e:
@@ -124,6 +123,8 @@ tasks.register('e2eStack') {
     group = 'verification'
     description = 'Bring up full local stack (keep running), then installPlaywright + runE2e'
     dependsOn 'e2eStackUp', ':rfr-e2e:installPlaywright', 'runE2e'
+    outputs.upToDateWhen { false }
+
 }
 
 gradle.projectsEvaluated {
@@ -133,14 +134,5 @@ gradle.projectsEvaluated {
     }
     rootProject.tasks.named('runE2e').configure {
         mustRunAfter 'e2eStackUp', installPw
-    }
-}
-
-gradle.taskGraph.whenReady { graph ->
-    def stack = rootProject.tasks.findByName('e2eStack')
-    if (stack != null && graph.hasTask(stack)) {
-        project(':rfr-e2e').tasks.named('test').configure {
-            outputs.upToDateWhen { false }
-        }
     }
 }

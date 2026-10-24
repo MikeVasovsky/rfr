@@ -9,7 +9,7 @@
 ./gradlew e2eStack
 ```
 
-Пока `runE2e` гоняет **все** тесты модуля `rfr-e2e`. Фильтры по тегам — `-DincludeTags` / `-DexcludeTags` (см. `README.md`).
+Пока `runE2e` гоняет **все** тесты модуля `rfr-e2e` и **всегда перезапускает** их (UP-TO-DATE отключён: стек живой, код тестов мог не меняться). Фильтры по тегам — `-DincludeTags` / `-DexcludeTags` (см. `README.md`).
 
 ## Конфигурация
 
