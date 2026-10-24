@@ -13,6 +13,9 @@
    - Cursor rule: `.cursor/rules/01-propose-before-implement.mdc` (`alwaysApply: true`)
 4. **Новый архитектурный слой → обновить AGENTS.md модуля.** Пакеты/папки-слои отражать в `AGENTS.md` той части проекта, где слой появился (например `rfr-e2e/AGENTS.md`). Корневой `AGENTS.md` — только для нового модуля в корне / Important paths / краткой отсылки.
    - Cursor rule: `.cursor/rules/03-agents-md-architecture-sync.mdc` (`alwaysApply: true`)
+5. **Shell permissions.** Можно старт/стоп БД, бэка, фронта и e2e без спроса; **запрещены** `git push` и `rm`/`rmdir`/`unlink`/`git rm` (вместо удаления — `*.bak`).
+   - Cursor rule: `.cursor/rules/04-shell-permissions.mdc` (`alwaysApply: true`)
+   - Hook: `.cursor/hooks.json` → `.cursor/hooks/shell-permissions.py` (`beforeShellExecution`)
 
 ## Structure
 

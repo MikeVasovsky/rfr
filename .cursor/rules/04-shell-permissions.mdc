@@ -1,0 +1,31 @@
+---
+description: Shell permissions — start/stop stack OK; deny git push and rm
+alwaysApply: true
+---
+
+# Shell permissions (rfr)
+
+## Разрешено без спроса у пользователя
+
+Агент **может** сам запускать и останавливать локальный стек и тесты (не спрашивать «можно ли поднять/погасить»):
+
+| Цель | Примеры |
+|------|---------|
+| БД | `./localenv.sh`, `docker compose up mysql --wait`, `docker compose stop mysql` / `down` |
+| Бэкенд | `./gradlew runAll --parallel`, `:rfr-auth:bootRun`, `:rfr-api:bootRun`; стоп через `./ports.sh` или kill по 9001/8081 |
+| Фронт | `cd rfr-gql-client && npm run dev` (и `npm ci` при необходимости); стоп процесса Vite / порт 3001 |
+| Тесты | `./gradlew runE2e` / `:rfr-e2e:test` |
+
+Порядок старта: MySQL → auth+api → frontend. Тесты — против уже живого стека.
+
+## Запрещено (всегда)
+
+- **`git push`** (и любые флаги: `-u`, `--force`, …) — только если пользователь **явно** попросил push/PR в этом сообщении.
+- **`rm` / `rmdir` / `unlink` / `git rm`** — удаление файлов запрещено.
+
+Вместо удаления: переименовать или скопировать в `*.bak` (например `mv path path.bak`).
+
+## Enforcement
+
+Жёсткая блокировка в shell: `.cursor/hooks.json` → `beforeShellExecution` → `.cursor/hooks/shell-permissions.py`.
+Rule — политика для агента; hook — технический запрет `push`/`rm`.
