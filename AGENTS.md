@@ -19,7 +19,7 @@
 6. **Compile-on-edit.** После `Write`/`StrReplace` хук компилирует **только затронутый** модуль и пишет результат в agent loop (`additional_context`):
    - `rfr-api` / `rfr-auth` `*.java` → `:module:compileJava` или `compileTestJava`
    - `rfr-e2e` `*.java` → `:rfr-e2e:compileTestJava`
-   - `rfr-gql-client` `*.ts`/`*.tsx` → `npx tsc --noEmit`
+   - `rfr-gql-client` `*.ts`/`*.tsx` → `npx tsc --noEmit`, затем `npx eslint <rel-path>` из `rfr-gql-client` (flat config; путь относительно этой папки; флаги как в CI)
    - Hook: `.cursor/hooks/compile-on-edit.py` (`postToolUse`)
 
 ## Structure

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""postToolUse: after Write/StrReplace, compile only the affected module; inject output."""
+"""postToolUse: after Write/StrReplace, compile/lint only the affected module; inject output."""
 
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -100,19 +99,19 @@ def _run(cmd: list[str], *, cwd: Path, timeout: int) -> tuple[int, str]:
     return proc.returncode, _truncate(combined)
 
 
-def _plan(rel: str, root: Path) -> tuple[str, list[str], Path, int] | None:
-    """Return (label, cmd, cwd, timeout) for the affected module only."""
+def _plan_checks(rel: str, root: Path) -> list[tuple[str, list[str], Path, int]]:
+    """Return list of (label, cmd, cwd, timeout) for the affected module only."""
     parts = rel.split("/")
     if not parts or parts[0] in (".",):
-        return None
+        return []
     if "build" in parts or "node_modules" in parts or "dist" in parts:
-        return None
+        return []
 
     top = parts[0]
 
     if top in JAVA_MAIN_MODULES:
         if not rel.endswith(".java"):
-            return None
+            return []
         module = top
         joined = "/" + rel
         task = (
@@ -120,36 +119,58 @@ def _plan(rel: str, root: Path) -> tuple[str, list[str], Path, int] | None:
             if "/src/test/" in joined
             else f":{module}:compileJava"
         )
-        return (
-            f"Java compile ({task}) after edit of {rel}",
-            ["./gradlew", task, "--console=plain"],
-            root,
-            GRADLE_TIMEOUT_SEC,
-        )
+        return [
+            (
+                f"Java compile ({task}) after edit of {rel}",
+                ["./gradlew", task, "--console=plain"],
+                root,
+                GRADLE_TIMEOUT_SEC,
+            )
+        ]
 
     if top == "rfr-e2e":
         if not rel.endswith(".java"):
-            return None
+            return []
         task = ":rfr-e2e:compileTestJava"
-        return (
-            f"Java compile ({task}) after edit of {rel}",
-            ["./gradlew", task, "--console=plain"],
-            root,
-            GRADLE_TIMEOUT_SEC,
-        )
+        return [
+            (
+                f"Java compile ({task}) after edit of {rel}",
+                ["./gradlew", task, "--console=plain"],
+                root,
+                GRADLE_TIMEOUT_SEC,
+            )
+        ]
 
     if top == "rfr-gql-client":
         suffix = Path(rel).suffix.lower()
         if suffix not in FRONTEND_EXTS:
-            return None
-        return (
-            f"Frontend tsc --noEmit after edit of {rel}",
-            ["npx", "tsc", "--noEmit"],
-            root / "rfr-gql-client",
-            FRONT_TIMEOUT_SEC,
-        )
+            return []
+        client_root = root / "rfr-gql-client"
+        # Flat ESLint config: run from rfr-gql-client with path relative to that folder.
+        rel_in_client = Path(rel).relative_to("rfr-gql-client").as_posix()
+        return [
+            (
+                f"Frontend tsc --noEmit after edit of {rel}",
+                ["npx", "tsc", "--noEmit"],
+                client_root,
+                FRONT_TIMEOUT_SEC,
+            ),
+            (
+                f"Frontend eslint after edit of {rel} (cwd rfr-gql-client, file {rel_in_client})",
+                [
+                    "npx",
+                    "eslint",
+                    rel_in_client,
+                    "--report-unused-disable-directives",
+                    "--max-warnings",
+                    "0",
+                ],
+                client_root,
+                FRONT_TIMEOUT_SEC,
+            ),
+        ]
 
-    return None
+    return []
 
 
 def main() -> int:
@@ -183,24 +204,27 @@ def main() -> int:
         _emit(None)
         return 0
 
-    plan = _plan(rel, root)
-    if plan is None:
+    checks = _plan_checks(rel, root)
+    if not checks:
         _emit(None)
         return 0
 
-    label, cmd, cwd, timeout = plan
-    if not cwd.is_dir():
-        _emit(f"{label}\n[skip] cwd missing: {cwd}")
-        return 0
+    sections: list[str] = []
+    worst = 0
+    for label, cmd, cwd, timeout in checks:
+        if not cwd.is_dir():
+            sections.append(f"{label}\n[skip] cwd missing: {cwd}")
+            worst = max(worst, 1)
+            continue
+        code, output = _run(cmd, cwd=cwd, timeout=timeout)
+        worst = max(worst, 0 if code == 0 else code)
+        status = "OK" if code == 0 else "FAILED"
+        block = f"[compile-on-edit] {status} (exit {code})\n{label}\n$ {' '.join(cmd)}\n"
+        block += output if output else "(no output)"
+        sections.append(block)
 
-    code, output = _run(cmd, cwd=cwd, timeout=timeout)
-    status = "OK" if code == 0 else "FAILED"
-    body = f"[compile-on-edit] {status} (exit {code})\n{label}\n$ {' '.join(cmd)}\n"
-    if output:
-        body += output
-    else:
-        body += "(no output)"
-    _emit(body)
+    header = "[compile-on-edit] ALL OK" if worst == 0 else f"[compile-on-edit] FAILED (worst exit {worst})"
+    _emit(header + "\n\n" + "\n\n".join(sections))
     return 0
 
 
