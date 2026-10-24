@@ -4,7 +4,6 @@
     "beforeShellExecution": [
       {
         "command": ".cursor/hooks/shell-permissions.py",
-        "matcher": "git\\s+.*\\bpush\\b|\\brm\\b|\\brmdir\\b|\\bunlink\\b",
         "failClosed": true
       }
     ],

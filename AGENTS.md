@@ -13,9 +13,9 @@
    - Cursor rule: `.cursor/rules/01-propose-before-implement.mdc` (`alwaysApply: true`)
 4. **Новый архитектурный слой → обновить AGENTS.md модуля.** Пакеты/папки-слои отражать в `AGENTS.md` той части проекта, где слой появился (например `rfr-e2e/AGENTS.md`). Корневой `AGENTS.md` — только для нового модуля в корне / Important paths / краткой отсылки.
    - Cursor rule: `.cursor/rules/03-agents-md-architecture-sync.mdc` (`alwaysApply: true`)
-5. **Shell permissions.** Можно старт/стоп БД, бэка, фронта и e2e без спроса; **запрещены** `rm`/`rmdir`/`unlink`/`git rm` (вместо удаления — `*.bak`). Git — в пункте 1 / rule `00`.
+5. **Shell permissions.** Можно старт/стоп БД, бэка, фронта и e2e без спроса. **Запрещены** удаление файлов (`rm`/`find -delete`/… → только `*.bak`), `git push`/`send-pack`, разрушающий git (`clean`, `reset --hard`, `restore`, `filter-*`, …). Детали — rule `04`.
    - Cursor rule: `.cursor/rules/04-shell-permissions.mdc` (`alwaysApply: true`)
-   - Hook: `.cursor/hooks.json` → `.cursor/hooks/shell-permissions.py` (`beforeShellExecution`; также режет `git push`)
+   - Hook: `.cursor/hooks/shell-permissions.py` (`beforeShellExecution`, failClosed)
 6. **Compile-on-edit.** После `Write`/`StrReplace` хук компилирует **только затронутый** модуль и пишет результат в agent loop (`additional_context`):
    - `rfr-api` / `rfr-auth` `*.java` → `:module:compileJava` или `compileTestJava`
    - `rfr-e2e` `*.java` → `:rfr-e2e:compileTestJava`

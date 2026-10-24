@@ -34,4 +34,5 @@ alwaysApply: true
 
 ## Hook
 
-`git push` дополнительно режется хуком `.cursor/hooks/shell-permissions.py`. Даже если пользователь попросил push — агент **не** выполняет `git push` сам: пуш делает пользователь (или просит отключить/обойти hook явно).
+Хук `.cursor/hooks/shell-permissions.py` режет `git push` / `send-pack`, удаление файлов и разрушающий git (clean / reset --hard / restore / filter-* и т.д.).  
+Даже если пользователь попросил push — агент **не** выполняет `git push` сам. Полный список — rule `04-shell-permissions.mdc`.
