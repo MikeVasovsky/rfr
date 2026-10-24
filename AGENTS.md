@@ -5,7 +5,7 @@
 
 ## Working rules (global)
 
-1. **Текущее дерево, без worktree, без коммитов.** Правки — в текущем working tree; новые git worktree не создавать; `git commit` / push / PR — только по явной просьбе пользователя.
+1. **Текущее дерево, без worktree, без коммитов.** Правки — в текущем working tree; новые git worktree не создавать; `git commit` / push / PR — только по явной просьбе пользователя. Агент сам `git push` не выполняет (hook блокирует).
    - Cursor rule: `.cursor/rules/00-edit-in-place-no-commit.mdc` (`alwaysApply: true`)
 2. **Перекрытие user rules.** Глобальные правила из `~/.cursor/rules` (Worktree, Elegant Objects, жёсткий unit-TDD) для этого репо **не применяются**, где конфликтуют.
    - Cursor rule: `.cursor/rules/02-rfr-overrides-globals.mdc` (`alwaysApply: true`)
@@ -13,9 +13,9 @@
    - Cursor rule: `.cursor/rules/01-propose-before-implement.mdc` (`alwaysApply: true`)
 4. **Новый архитектурный слой → обновить AGENTS.md модуля.** Пакеты/папки-слои отражать в `AGENTS.md` той части проекта, где слой появился (например `rfr-e2e/AGENTS.md`). Корневой `AGENTS.md` — только для нового модуля в корне / Important paths / краткой отсылки.
    - Cursor rule: `.cursor/rules/03-agents-md-architecture-sync.mdc` (`alwaysApply: true`)
-5. **Shell permissions.** Можно старт/стоп БД, бэка, фронта и e2e без спроса; **запрещены** `git push` и `rm`/`rmdir`/`unlink`/`git rm` (вместо удаления — `*.bak`).
+5. **Shell permissions.** Можно старт/стоп БД, бэка, фронта и e2e без спроса; **запрещены** `rm`/`rmdir`/`unlink`/`git rm` (вместо удаления — `*.bak`). Git — в пункте 1 / rule `00`.
    - Cursor rule: `.cursor/rules/04-shell-permissions.mdc` (`alwaysApply: true`)
-   - Hook: `.cursor/hooks.json` → `.cursor/hooks/shell-permissions.py` (`beforeShellExecution`)
+   - Hook: `.cursor/hooks.json` → `.cursor/hooks/shell-permissions.py` (`beforeShellExecution`; также режет `git push`)
 6. **Compile-on-edit.** После `Write`/`StrReplace` хук компилирует **только затронутый** модуль и пишет результат в agent loop (`additional_context`):
    - `rfr-api` / `rfr-auth` `*.java` → `:module:compileJava` или `compileTestJava`
    - `rfr-e2e` `*.java` → `:rfr-e2e:compileTestJava`
@@ -161,9 +161,21 @@ DGS Codegen генерирует типы в `io.student.rangiffler.model.types`
 
 Архитектура, запуск, Page Object, фикстуры, теги — `rfr-e2e/AGENTS.md`. Подробности — `rfr-e2e/README.md`.
 
+Только тесты (стек уже поднят):
+
 ```bash
 ./gradlew runE2e
+# Windows: .\gradlew.bat runE2e
 ```
+
+Поднять MySQL + auth/api + frontend (оставить работать) и прогнать e2e:
+
+```bash
+./gradlew e2eStack
+# Windows: .\gradlew.bat e2eStack
+```
+
+Нужны Docker Desktop и Node/npm в PATH. Логи фона: `build/e2eStack/`.
 
 ## Conventions for agents
 

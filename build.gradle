@@ -55,3 +55,5 @@ tasks.register('runE2e') {
     description = 'Run all rfr-e2e tests'
     dependsOn ':rfr-e2e:test'
 }
+
+apply from: 'gradle/e2eStack.gradle'

@@ -60,8 +60,7 @@ def main() -> int:
     if _GIT_PUSH.search(scanned):
         _deny(
             "Blocked: git push is disabled for the agent in this repo.",
-            "Do not run git push. Only push if the user explicitly asked in this message; "
-            "otherwise leave pushing to the user.",
+            "Do not run git push (rule 00 + shell hook). Leave pushing to the user.",
         )
         return 0
 

@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Негативные UI-сценарии логина: неверный пароль и несуществующий пользователь.
- * Spring Security маскирует {@code UsernameNotFoundException} как Bad credentials.
+ * Spring Security маскирует {@code UsernameNotFoundException} как {@code Bad credentials}
+ * (в auth {@code Locale.setDefault(US)} + {@code spring.web.locale=en_US}).
  */
 public class LoginNegativeTest extends AuthUiTest {
 

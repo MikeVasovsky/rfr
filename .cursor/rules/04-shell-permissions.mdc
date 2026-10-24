@@ -1,9 +1,11 @@
 ---
-description: Shell permissions — start/stop stack OK; deny git push and rm
+description: Shell permissions — start/stop stack OK; deny rm (git policy is in 00)
 alwaysApply: true
 ---
 
 # Shell permissions (rfr)
+
+Политика **git** (worktree, commit, push, PR) — в `.cursor/rules/00-edit-in-place-no-commit.mdc`. Этот файл — только **локальный стек** и **удаление файлов**.
 
 ## Разрешено без спроса у пользователя
 
@@ -20,12 +22,11 @@ alwaysApply: true
 
 ## Запрещено (всегда)
 
-- **`git push`** (и любые флаги: `-u`, `--force`, …) — только если пользователь **явно** попросил push/PR в этом сообщении.
 - **`rm` / `rmdir` / `unlink` / `git rm`** — удаление файлов запрещено.
 
 Вместо удаления: переименовать или скопировать в `*.bak` (например `mv path path.bak`).
 
 ## Enforcement
 
-Жёсткая блокировка в shell: `.cursor/hooks.json` → `beforeShellExecution` → `.cursor/hooks/shell-permissions.py`.
-Rule — политика для агента; hook — технический запрет `push`/`rm`.
+Жёсткая блокировка в shell: `.cursor/hooks.json` → `beforeShellExecution` → `.cursor/hooks/shell-permissions.py`  
+(блокирует `rm*` / `git rm`; также `git push` как technical backstop к правилу `00`).

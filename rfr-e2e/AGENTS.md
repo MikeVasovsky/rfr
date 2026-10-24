@@ -4,6 +4,9 @@
 ./gradlew :rfr-e2e:installPlaywright
 ./gradlew runE2e
 # эквивалент: ./gradlew :rfr-e2e:test
+
+# весь стенд + e2e (Win/Mac), стек не гасится:
+./gradlew e2eStack
 ```
 
 Пока `runE2e` гоняет **все** тесты модуля `rfr-e2e`. Фильтры по тегам — `-DincludeTags` / `-DexcludeTags` (см. `README.md`).
