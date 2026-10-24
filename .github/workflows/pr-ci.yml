@@ -9,24 +9,96 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            workflow:
+              - '.github/workflows/**'
+            gradle_root:
+              - 'build.gradle'
+              - 'settings.gradle'
+              - 'gradle/**'
+              - 'gradlew'
+              - 'gradlew.bat'
+            auth:
+              - 'rfr-auth/**'
+            api:
+              - 'rfr-api/**'
+            e2e:
+              - 'rfr-e2e/**'
+            frontend:
+              - 'rfr-gql-client/**'
+
+      - name: Resolve modules to build
+        id: mods
+        run: |
+          set -euo pipefail
+          all=false
+          if [[ "${{ steps.filter.outputs.workflow }}" == "true" || "${{ steps.filter.outputs.gradle_root }}" == "true" ]]; then
+            all=true
+          fi
+          auth=false
+          api=false
+          e2e=false
+          frontend=false
+          backend=false
+          if [[ "$all" == "true" ]]; then
+            auth=true
+            api=true
+            e2e=true
+            frontend=true
+          else
+            [[ "${{ steps.filter.outputs.auth }}" == "true" ]] && auth=true
+            [[ "${{ steps.filter.outputs.api }}" == "true" ]] && api=true
+            [[ "${{ steps.filter.outputs.e2e }}" == "true" ]] && e2e=true
+            [[ "${{ steps.filter.outputs.frontend }}" == "true" ]] && frontend=true
+          fi
+          if [[ "$auth" == "true" || "$api" == "true" || "$e2e" == "true" ]]; then
+            backend=true
+          fi
+          {
+            echo "auth=$auth"
+            echo "api=$api"
+            echo "e2e=$e2e"
+            echo "frontend=$frontend"
+            echo "backend=$backend"
+          } >> "$GITHUB_OUTPUT"
+          echo "Build plan: auth=$auth api=$api e2e=$e2e frontend=$frontend (all=$all)"
+
       - uses: actions/setup-java@v4
+        if: steps.mods.outputs.backend == 'true'
         with:
           distribution: temurin
           java-version: "25"
           cache: gradle
 
-      - name: Build backends and compile e2e
-        run: ./gradlew :rfr-auth:assemble :rfr-api:assemble :rfr-e2e:testClasses --no-daemon
+      - name: Build changed backend modules
+        if: steps.mods.outputs.backend == 'true'
+        run: |
+          set -euo pipefail
+          tasks=()
+          [[ "${{ steps.mods.outputs.auth }}" == "true" ]] && tasks+=(":rfr-auth:assemble")
+          [[ "${{ steps.mods.outputs.api }}" == "true" ]] && tasks+=(":rfr-api:assemble")
+          [[ "${{ steps.mods.outputs.e2e }}" == "true" ]] && tasks+=(":rfr-e2e:testClasses")
+          echo "Gradle tasks: ${tasks[*]}"
+          ./gradlew "${tasks[@]}" --no-daemon
 
       - uses: actions/setup-node@v4
+        if: steps.mods.outputs.frontend == 'true'
         with:
           node-version: "22"
           cache: npm
           cache-dependency-path: rfr-gql-client/package-lock.json
 
       - name: Lint and build frontend
+        if: steps.mods.outputs.frontend == 'true'
         working-directory: rfr-gql-client
         run: |
           npm ci
           npm run lint
           npm run build
+
+      - name: Nothing to build
+        if: steps.mods.outputs.backend != 'true' && steps.mods.outputs.frontend != 'true'
+        run: echo "No auth/api/e2e/frontend/workflow/gradle-root changes — skip compile."

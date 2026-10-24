@@ -7,6 +7,13 @@
         "matcher": "git\\s+.*\\bpush\\b|\\brm\\b|\\brmdir\\b|\\bunlink\\b",
         "failClosed": true
       }
+    ],
+    "postToolUse": [
+      {
+        "command": ".cursor/hooks/compile-on-edit.py",
+        "matcher": "Write|StrReplace",
+        "timeout": 200
+      }
     ]
   }
 }
