@@ -27,6 +27,10 @@ dependencies {
     testImplementation "io.qameta.allure:allure-jupiter"
     testImplementation "io.qameta.allure:allure-playwright"
     testImplementation "com.microsoft.playwright:playwright:$playwrightVersion"
+    testImplementation "net.datafaker:datafaker:2.4.4"
+    testImplementation "mysql:mysql-connector-java:8.0.33"
+    testImplementation "org.springframework:spring-jdbc:6.2.11"
+    testImplementation "org.springframework.security:spring-security-crypto:6.5.5"
 
     testImplementation "org.junit.jupiter:junit-jupiter"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
@@ -42,6 +46,23 @@ allure {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        def include = System.getProperty('includeTags')
+        if (include) {
+            includeTags(*(include.split(',')*.trim().findAll { it }))
+        }
+        def exclude = System.getProperty('excludeTags')
+        if (exclude) {
+            excludeTags(*(exclude.split(',')*.trim().findAll { it }))
+        }
+    }
     jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
+    systemProperty 'rfr.frontUrl', System.getProperty('rfr.frontUrl', 'http://localhost:3001')
+    systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
+}
+
+tasks.register('installPlaywright', JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.microsoft.playwright.CLI'
+    args 'install', 'chromium'
 }
