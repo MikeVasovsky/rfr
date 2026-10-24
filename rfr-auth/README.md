@@ -196,6 +196,8 @@ cd rfr-auth
 # или main class io.student.rangiffler.RangifflerAuthApplication из IDE
 ```
 
+Оба бэкенда сразу (из корня): `./gradlew runAll --parallel` (Windows: `.\gradlew.bat runAll --parallel`). Полный быстрый старт стенда — в корневом `README.md`.
+
 Проверка:
 
 ```bash
