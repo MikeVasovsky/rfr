@@ -177,6 +177,8 @@ DGS Codegen генерирует типы в `io.student.rangiffler.model.types`
 
 Нужны Docker Desktop и Node/npm в PATH. Логи фона: `build/e2eStack/`.
 
+CI e2e (MySQL `services` + стек + `runE2e`): `.github/workflows/ci.yml` (job `e2e`).
+
 ## Conventions for agents
 
 - Порядок старта: MySQL → auth → api → frontend.
