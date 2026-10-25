@@ -121,14 +121,14 @@ tasks.register('e2eStackUp') {
 
 tasks.register('e2eStack') {
     group = 'verification'
-    description = 'Bring up full local stack (keep running), then installPlaywright + runE2e'
-    dependsOn 'e2eStackUp', ':rfr-e2e:installPlaywright', 'runE2e'
+    description = 'Bring up full local stack (keep running), then installPlaywrightWithDeps + runE2e'
+    dependsOn 'e2eStackUp', ':rfr-e2e:installPlaywrightWithDeps', 'runE2e'
     outputs.upToDateWhen { false }
 
 }
 
 gradle.projectsEvaluated {
-    def installPw = project(':rfr-e2e').tasks.named('installPlaywright')
+    def installPw = project(':rfr-e2e').tasks.named('installPlaywrightWithDeps')
     installPw.configure {
         mustRunAfter rootProject.tasks.named('e2eStackUp')
     }

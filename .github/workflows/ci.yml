@@ -76,12 +76,15 @@ jobs:
           cache: npm
           cache-dependency-path: rfr-gql-client/package-lock.json
 
+      - name: Warm Gradle cache (auth + api classes)
+        run: ./gradlew :rfr-auth:classes :rfr-api:classes --no-daemon
+
       - name: Start backends (runAll --parallel, background)
         run: |
           set -euo pipefail
-          mkdir -p build/ci-e2e/gradle-home build/ci-e2e/project-cache
-          GRADLE_USER_HOME="$PWD/build/ci-e2e/gradle-home" \
-            nohup ./gradlew runAll --parallel --no-daemon \
+          mkdir -p build/ci-e2e/project-cache
+          # Use default GRADLE_USER_HOME so setup-java cache is reused
+          nohup ./gradlew runAll --parallel --no-daemon \
             --project-cache-dir="$PWD/build/ci-e2e/project-cache" \
             > runAll.log 2>&1 &
           echo $! > runAll.pid
@@ -102,11 +105,18 @@ jobs:
             local host=$1 port=$2 timeout_sec=$3
             echo "Waiting for ${host}:${port} (timeout ${timeout_sec}s)..."
             # Fail on timeout; poll until TCP accepts (no fixed sleep-before-tests)
-            timeout "${timeout_sec}" bash -c "
+            if ! timeout "${timeout_sec}" bash -c "
               while ! (echo >/dev/tcp/${host}/${port}) >/dev/null 2>&1; do
                 sleep 0.5
               done
-            "
+            "; then
+              echo "::error::Port ${host}:${port} not open within ${timeout_sec}s"
+              echo "===== runAll.log (tail) ====="
+              tail -n 200 runAll.log || true
+              echo "===== front.log (tail) ====="
+              tail -n 100 front.log || true
+              exit 124
+            fi
             echo "Port ${port} is open"
           }
           wait_port 127.0.0.1 9001 180
