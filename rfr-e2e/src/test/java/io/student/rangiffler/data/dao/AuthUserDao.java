@@ -1,7 +1,5 @@
 package io.student.rangiffler.data.dao;
 
-import io.student.rangiffler.data.db.InTransaction;
-import io.student.rangiffler.data.db.JdbcClients;
 import io.student.rangiffler.data.db.Sql;
 import io.student.rangiffler.model.TestUser;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -27,8 +25,8 @@ public final class AuthUserDao {
    * затем authorities {@code read} и {@code write} по его id.
    */
   public static void create(TestUser user) {
-    InTransaction.run(AUTH, () -> {
-      JdbcClient jdbc = jdbc();
+    AUTH.run(() -> {
+      JdbcClient jdbc = AUTH.jdbc();
       jdbc.sql(Sql.load("sql/auth/insert_user.sql"))
           .params(user.username(), PASSWORD_ENCODER.encode(user.password()))
           .update();
@@ -44,8 +42,8 @@ public final class AuthUserDao {
    * Если записи нет — ничего не делает (идемпотентно).
    */
   public static void delete(TestUser user) {
-    InTransaction.run(AUTH, () -> {
-      JdbcClient jdbc = jdbc();
+    AUTH.run(() -> {
+      JdbcClient jdbc = AUTH.jdbc();
       byte[] userId = findUserId(jdbc, user.username());
       if (userId == null) {
         return;
@@ -53,11 +51,6 @@ public final class AuthUserDao {
       jdbc.sql(Sql.load("sql/auth/delete_authorities.sql")).param(userId).update();
       jdbc.sql(Sql.load("sql/auth/delete_user.sql")).param(user.username()).update();
     });
-  }
-
-  /** {@link JdbcClient} для схемы auth. */
-  private static JdbcClient jdbc() {
-    return JdbcClients.of(AUTH);
   }
 
   /**

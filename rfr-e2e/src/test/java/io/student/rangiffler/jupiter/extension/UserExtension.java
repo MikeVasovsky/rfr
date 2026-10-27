@@ -1,7 +1,9 @@
 package io.student.rangiffler.jupiter.extension;
 
 import io.qameta.allure.Allure;
+import io.student.rangiffler.data.fixture.SingleUserFixture;
 import io.student.rangiffler.data.fixture.UserFixture;
+import io.student.rangiffler.jupiter.UserRequest;
 import io.student.rangiffler.jupiter.annotation.User;
 import io.student.rangiffler.model.TestUser;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -11,42 +13,35 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Optional;
 
 /**
  * Жизненный цикл тестового пользователя в auth БД:
- * {@link BeforeEachCallback} создаёт {@link UserFixture},
+ * {@link BeforeEachCallback} собирает {@link UserRequest} из {@link User} и создаёт {@link UserFixture},
  * {@link ParameterResolver} передаёт {@code @User TestUser},
  * {@link AfterEachCallback} закрывает fixture.
  */
 public final class UserExtension implements BeforeEachCallback, ParameterResolver, AfterEachCallback {
 
-  /** Изолированное хранилище JUnit для данных этого extension в рамках теста. */
   private static final ExtensionContext.Namespace NAMESPACE =
       ExtensionContext.Namespace.create(UserExtension.class);
-  /** Ключ, под которым в store лежит созданный {@link UserFixture}. */
   private static final String FIXTURE_KEY = "userFixture";
 
   /**
    * Перед тестом: если у метода есть параметр {@code @User TestUser},
-   * создаёт пользователя в auth БД через {@link UserFixture#create()}
-   * и кладёт fixture в store текущего теста.
+   * строит {@link UserRequest} из аннотации, создаёт fixture и кладёт в store.
    */
   @Override
   public void beforeEach(ExtensionContext context) {
-    if (!requiresUser(context)) {
-      return;
-    }
-    Allure.step("Создать пользователя в auth БД", () ->
-        store(context).put(FIXTURE_KEY, UserFixture.create())
+    findUserAnnotation(context).ifPresent(annotation ->
+        Allure.step("Создать пользователя в auth БД", () ->
+            store(context).put(FIXTURE_KEY, SingleUserFixture.create(UserRequest.from(annotation)))
+        )
     );
   }
 
-  /**
-   * Сообщает JUnit, что этот resolver умеет внедрять параметр
-   * с аннотацией {@link User} типа {@link TestUser}.
-   */
   @Override
   public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
     return parameterContext.isAnnotated(User.class)
@@ -55,21 +50,28 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
 
   /**
    * Достаёт из store созданный в {@link #beforeEach} fixture
-   * и отдаёт тесту {@link TestUser} (логин/пароль и т.п.).
-   * Если fixture нет — ошибка резолва параметра.
+   * и отдаёт тесту {@link TestUser}. Если fixture нет — ошибка резолва параметра.
    */
   @Override
   public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-    return Optional.ofNullable(store(extensionContext).get(FIXTURE_KEY, UserFixture.class))
-        .map(UserFixture::user)
-        .orElseThrow(() -> new ParameterResolutionException(
-            "Пользователь не создан в BeforeEachCallback для параметра @User TestUser"
-        ));
+    UserFixture value = store(extensionContext).get(FIXTURE_KEY, UserFixture.class);
+    if (value == null) {
+      throw new ParameterResolutionException(
+          "Пользователь не создан в BeforeEachCallback для параметра @User TestUser"
+      );
+    }
+    TestUser user = value.user();
+    if (user == null) {
+      throw new ParameterResolutionException(
+          "Пользователь не создан в BeforeEachCallback для параметра @User TestUser"
+      );
+    }
+    return user;
   }
 
   /**
-   * После теста: забирает fixture из store и вызывает {@link UserFixture#close()},
-   * чтобы удалить пользователя из auth БД. Если fixture не создавали — ничего не делает.
+   * После теста: забирает fixture из store и вызывает {@link UserFixture#close()}.
+   * Если fixture не создавали — ничего не делает.
    */
   @Override
   public void afterEach(ExtensionContext context) {
@@ -77,20 +79,21 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
         .ifPresent(fixture -> Allure.step("Удалить пользователя из auth БД", fixture::close));
   }
 
-  /** Store текущего теста в namespace этого extension (туда кладём/берём fixture). */
   private static ExtensionContext.Store store(ExtensionContext context) {
     return context.getStore(NAMESPACE);
   }
 
-  /**
-   * Нужен ли пользователю этот тест: есть ли среди параметров метода
-   * хотя бы один {@code @User TestUser}. Без такого параметра before/after не трогают БД.
-   */
-  private static boolean requiresUser(ExtensionContext context) {
+  private static Optional<User> findUserAnnotation(ExtensionContext context) {
     return context.getTestMethod()
         .stream()
         .flatMap(method -> Arrays.stream(method.getParameters()))
-        .anyMatch(parameter -> parameter.isAnnotationPresent(User.class)
-            && TestUser.class.isAssignableFrom(parameter.getType()));
+        .filter(UserExtension::isUserTestUserParameter)
+        .map(parameter -> parameter.getAnnotation(User.class))
+        .findFirst();
+  }
+
+  private static boolean isUserTestUserParameter(Parameter parameter) {
+    return parameter.isAnnotationPresent(User.class)
+        && TestUser.class.isAssignableFrom(parameter.getType());
   }
 }

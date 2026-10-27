@@ -48,10 +48,10 @@ public final class Sql {
   }
 
   /**
-   * Как {@link #execute}, но внутри транзакции {@link InTransaction}:
+   * Как {@link #execute}, но внутри транзакции схемы:
    * либо весь скрипт, либо откат.
    */
   public static void executeInTransaction(Databases database, String classpathLocation) {
-    InTransaction.run(database, () -> execute(database, classpathLocation));
+    database.run(() -> execute(database, classpathLocation));
   }
 }
