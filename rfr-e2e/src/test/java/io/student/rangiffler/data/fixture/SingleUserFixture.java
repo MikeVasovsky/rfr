@@ -22,7 +22,7 @@ public final class SingleUserFixture implements UserFixture {
 
   /**
    * По {@link UserRequest} генерирует {@link TestUser}, пишет в auth БД
-   * и возвращает fixture для cleanup. Friends/invitations пока не создаёт.
+   * и возвращает fixture для cleanup. Friends/invitations — в декораторах.
    */
   public static UserFixture create(UserRequest request) {
     TestUser user = RandomDataUtils.createUser();
@@ -45,6 +45,7 @@ public final class SingleUserFixture implements UserFixture {
     if (closed) {
       return;
     }
+    ApiUsers.deleteFriendships(user.username());
     AuthUserDao.delete(user);
     closed = true;
   }

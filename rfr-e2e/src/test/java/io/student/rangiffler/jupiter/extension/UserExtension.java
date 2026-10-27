@@ -1,7 +1,6 @@
 package io.student.rangiffler.jupiter.extension;
 
 import io.qameta.allure.Allure;
-import io.student.rangiffler.data.fixture.SingleUserFixture;
 import io.student.rangiffler.data.fixture.UserFixture;
 import io.student.rangiffler.jupiter.UserRequest;
 import io.student.rangiffler.jupiter.annotation.User;
@@ -37,7 +36,7 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
   public void beforeEach(ExtensionContext context) {
     findUserAnnotation(context).ifPresent(annotation ->
         Allure.step("Создать пользователя в auth БД", () ->
-            store(context).put(FIXTURE_KEY, SingleUserFixture.create(UserRequest.from(annotation)))
+            store(context).put(FIXTURE_KEY, UserRequest.from(annotation).fixture())
         )
     );
   }
