@@ -16,7 +16,7 @@
 - Page Objects — skill `page-object-tests` (`.cursor/skills/page-object-tests/SKILL.md`).
 - Вход только через UI; токены в `localStorage` не подставлять.
 - Проход через Playwright MCP ≠ зелёный тест; успех — JUnit через Gradle (`README.md`, `allure-report.ps1`).
-- Данные — `@User` → `UserExtension` → `UserRequest.fixture()` → `SingleUserFixture` (+ декораторы `UserWithFriendsFixture` / `UserWithIncomeInvitationsFixture` по счётчикам); профиль в api — `ProfileFixture` → `ApiUserDao` → `sql/api/*`. Без широких `DELETE`/`TRUNCATE`.
+- Данные — `@User` → `UserExtension` → `UserRequest.fixture()` → `SingleUserFixture` (+ декораторы friends/income); JDBC-сущности в `data/db`: `AuthAccount`, `Profile`, `Friendship`, `Friendships` (+ `TearDown` в fixture). Без широких `DELETE`/`TRUNCATE`.
 - Теги: UI — `web` (`BaseUiTest`), заглушки — `fake`. Новый тег сначала в README и в skill.
 - Пакетов `api` / `assertions` нет — не заводить без явной нужды. Конфиг URL — `TestConfig` / `-Drfr.*` (см. README).
 - Без комментариев к методам/полям (имена + `@Step`); над классом — краткий Javadoc. В Gradle/SQL/properties — без лишних комментариев.

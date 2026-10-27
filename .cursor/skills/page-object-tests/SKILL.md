@@ -38,7 +38,7 @@ description: >-
 
 14. Без комментариев к методам и полям: смысл методов передают имена и текст `@Step`. Над каждым классом — краткий Javadoc: за что отвечает класс.
 
-15. Группы тестов — через JUnit `@Tag` (не свои аннотации). UI-тесты наследуют `@Tag("web")` с `BaseUiTest`; не-UI заглушки — `@Tag("fake")`. Новый класс вне иерархии `BaseUiTest` помечай тегом явно. Запуск группы: `-DincludeTags=web` или `.\allure-report.ps1 -Tag web`. Допустимые теги и команды — в `rfr-e2e/README.md`; новый тег сначала добавь в README и в этот пункт skill.
+15. Группы тестов — через JUnit `@Tag` (не свои аннотации). UI-тесты наследуют `@Tag("web")` с `BaseUiTest`; не-UI заглушки — `@Tag("fake")`. Новый класс вне иерархии `BaseUiTest` помечай тегом явно. Запуск группы: `-DincludeTags=web` или `.\allure-report.ps1 -Tag web`. Допустимые теги и команды — в `rfr-e2e/README.md`; новый тег сначала добавь в README и в этот пункт skill. UI people/friends — пакет `test.people`.
 
 ## Where code lives
 
@@ -46,6 +46,6 @@ description: >-
 - Pages: `rfr-e2e/.../page/`
 - Components: `rfr-e2e/.../page/component/`
 - Locator helpers: `rfr-e2e/.../utils/LocatorOptions.java`
-- UI tests: `rfr-e2e/.../test/{auth,profile}/` (+ `BaseUiTest` in `test/`)
+- UI tests: `rfr-e2e/.../test/{auth,profile,people}/` (+ `BaseUiTest` in `test/`)
 - Browser lifecycle: `BaseUiTest` (`@Tag("web")`)
 - Run / Allure: `rfr-e2e/README.md`, `rfr-e2e/allure-report.ps1`

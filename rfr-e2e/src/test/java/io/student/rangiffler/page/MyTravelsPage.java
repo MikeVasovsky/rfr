@@ -1,11 +1,13 @@
 package io.student.rangiffler.page;
 
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
 import io.student.rangiffler.page.component.HeaderComponent;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import static io.student.rangiffler.utils.LocatorOptions.exactRole;
 
 /**
  * Кабинет «My Travels» ({@code /my-travels}): экран после успешной авторизации (карта и лента).
@@ -37,5 +39,11 @@ public final class MyTravelsPage {
   @Step("Открыть профиль через шапку")
   public ProfilePage clickProfile() {
     return header.clickProfile();
+  }
+
+  @Step("Открыть People через sidebar")
+  public PeoplePage clickPeople() {
+    page.getByRole(AriaRole.LINK, exactRole("People")).click();
+    return new PeoplePage(page);
   }
 }

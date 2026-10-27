@@ -1,6 +1,7 @@
 package io.student.rangiffler.data.fixture;
 
-import io.student.rangiffler.data.dao.AuthUserDao;
+import io.student.rangiffler.data.db.AuthAccount;
+import io.student.rangiffler.data.db.Friendships;
 import io.student.rangiffler.jupiter.UserRequest;
 import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.utils.RandomDataUtils;
@@ -13,11 +14,15 @@ public final class SingleUserFixture implements UserFixture {
 
   private final UserRequest request;
   private final TestUser user;
-  private boolean closed;
+  private final TearDown tearDown;
 
   private SingleUserFixture(UserRequest request, TestUser user) {
     this.request = request;
     this.user = user;
+    AuthAccount account = AuthAccount.of(user);
+    this.tearDown = new TearDown()
+        .with(() -> Friendships.of(user.username()).deleteAll())
+        .with(account::delete);
   }
 
   /**
@@ -26,7 +31,7 @@ public final class SingleUserFixture implements UserFixture {
    */
   public static UserFixture create(UserRequest request) {
     TestUser user = RandomDataUtils.createUser();
-    AuthUserDao.create(user);
+    AuthAccount.create(user);
     return new SingleUserFixture(request, user);
   }
 
@@ -42,11 +47,6 @@ public final class SingleUserFixture implements UserFixture {
 
   @Override
   public void close() {
-    if (closed) {
-      return;
-    }
-    ApiUsers.deleteFriendships(user.username());
-    AuthUserDao.delete(user);
-    closed = true;
+    tearDown.close();
   }
 }

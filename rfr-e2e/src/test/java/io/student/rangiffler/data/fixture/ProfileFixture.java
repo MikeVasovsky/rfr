@@ -1,6 +1,6 @@
 package io.student.rangiffler.data.fixture;
 
-import io.student.rangiffler.data.dao.ApiUserDao;
+import io.student.rangiffler.data.db.Profile;
 import io.student.rangiffler.model.TestUser;
 
 /**
@@ -9,11 +9,12 @@ import io.student.rangiffler.model.TestUser;
  */
 public final class ProfileFixture implements AutoCloseable {
 
-  private final String username;
-  private boolean closed;
+  private final Profile profile;
+  private final TearDown tearDown;
 
-  private ProfileFixture(String username) {
-    this.username = username;
+  private ProfileFixture(Profile profile) {
+    this.profile = profile;
+    this.tearDown = new TearDown().with(profile::delete);
   }
 
   /**
@@ -21,23 +22,15 @@ public final class ProfileFixture implements AutoCloseable {
    * для username из {@link TestUser} и возвращает fixture для cleanup.
    */
   public static ProfileFixture create(TestUser user) {
-    ApiUserDao.create(user.username());
-    return new ProfileFixture(user.username());
+    return new ProfileFixture(Profile.create(user.username()));
   }
 
   public String username() {
-    return username;
+    return profile.username();
   }
 
-  /**
-   * Удаляет профиль из api БД. Повторный вызов безопасен (no-op).
-   */
   @Override
   public void close() {
-    if (closed) {
-      return;
-    }
-    ApiUserDao.delete(username);
-    closed = true;
+    tearDown.close();
   }
 }
