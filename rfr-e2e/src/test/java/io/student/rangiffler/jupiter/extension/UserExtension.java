@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -21,6 +22,7 @@ import java.util.Optional;
  * {@link BeforeEachCallback} собирает {@link UserRequest} из {@link User} и создаёт {@link UserFixture},
  * {@link ParameterResolver} передаёт {@code @User TestUser},
  * {@link AfterEachCallback} закрывает fixture.
+ * Фазы {@code created}/{@code cleaned} публикуются через {@link ExtensionContext#publishReportEntry}.
  */
 public final class UserExtension implements BeforeEachCallback, ParameterResolver, AfterEachCallback {
 
@@ -35,9 +37,17 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
   @Override
   public void beforeEach(ExtensionContext context) {
     findUserAnnotation(context).ifPresent(annotation ->
-        Allure.step("Создать пользователя в auth БД", () ->
-            store(context).put(FIXTURE_KEY, UserRequest.from(annotation).fixture())
-        )
+        Allure.step("Создать пользователя в auth БД", () -> {
+          UserFixture fixture = UserRequest.from(annotation).fixture();
+          store(context).put(FIXTURE_KEY, fixture);
+          TestUser user = fixture.user();
+          context.publishReportEntry(Map.of(
+              "user", "created",
+              "username", user.username(),
+              "friends", String.valueOf(user.friends().size()),
+              "incomeInvitations", String.valueOf(user.incomeInvitations().size())
+          ));
+        })
     );
   }
 
@@ -75,7 +85,14 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
   @Override
   public void afterEach(ExtensionContext context) {
     Optional.ofNullable(store(context).remove(FIXTURE_KEY, UserFixture.class))
-        .ifPresent(fixture -> Allure.step("Удалить пользователя из auth БД", fixture::close));
+        .ifPresent(fixture -> Allure.step("Удалить пользователя из auth БД", () -> {
+          String username = fixture.user().username();
+          fixture.close();
+          context.publishReportEntry(Map.of(
+              "user", "cleaned",
+              "username", username
+          ));
+        }));
   }
 
   private static ExtensionContext.Store store(ExtensionContext context) {
