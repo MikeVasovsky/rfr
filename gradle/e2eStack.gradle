@@ -1,0 +1,138 @@
+
+
+/**
+ * Cross-platform stack + e2e:
+ *   ./gradlew e2eStack
+ *   .\gradlew.bat e2eStack
+ *
+ * MySQL → auth+api → frontend (background, left running) → installPlaywright → runE2e.
+ */
+
+def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+def stackDir = layout.buildDirectory.dir('e2eStack').get().asFile
+def runAllLog = new File(stackDir, 'runAll.log')
+def frontLog = new File(stackDir, 'frontend.log')
+
+static boolean portOpen(String host, int port) {
+    try (Socket s = new Socket()) {
+        s.connect(new InetSocketAddress(host, port), 500)
+        return true
+    } catch (IOException ignored) {
+        return false
+    }
+}
+
+/** Vite often binds [::1] only; backends usually 127.0.0.1 — probe both. */
+static boolean servicePortOpen(int port) {
+    return portOpen('127.0.0.1', port) || portOpen('::1', port) || portOpen('localhost', port)
+}
+
+static void waitForPort(int port, int timeoutSec, String label) {
+    long deadline = System.currentTimeMillis() + timeoutSec * 1000L
+    while (System.currentTimeMillis() < deadline) {
+        if (servicePortOpen(port)) {
+            println "e2eStack: ${label} ready on port ${port}"
+            return
+        }
+        Thread.sleep(500)
+    }
+    throw new GradleException("e2eStack: timeout ${timeoutSec}s waiting for ${label} (port ${port})")
+}
+
+static void runForeground(List<?> command, File workDir) {
+    def argv = command.collect { it.toString() }
+    def pb = new ProcessBuilder(argv).directory(workDir).inheritIO()
+    def proc = pb.start()
+    def code = proc.waitFor()
+    if (code != 0) {
+        throw new GradleException("Command failed (exit ${code}): ${argv.join(' ')}")
+    }
+}
+
+void startDetached(List<?> command, File workDir, File logFile, Map<?, ?> extraEnv) {
+    logFile.parentFile.mkdirs()
+    logFile.text = ''
+    def argv = command.collect { it.toString() }
+    def pb = new ProcessBuilder(argv).directory(workDir)
+    pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
+    pb.redirectErrorStream(true)
+    def env = pb.environment()
+    extraEnv.each { k, v -> env.put(k.toString(), v.toString()) }
+    pb.start()
+}
+
+tasks.register('e2eStackUp') {
+    group = 'verification'
+    description = 'Start MySQL, auth+api, frontend in background (does not stop them)'
+    outputs.upToDateWhen { false }
+
+    doLast {
+        stackDir.mkdirs()
+
+        println 'e2eStack: docker compose up -d --wait (MySQL)'
+        List<String> composeCmd = isWindows
+                ? ['cmd', '/c', 'docker', 'compose', 'up', '-d', '--wait']
+                : ['docker', 'compose', 'up', '-d', '--wait']
+        runForeground(composeCmd, rootDir)
+
+        if (servicePortOpen(9001) && servicePortOpen(8081)) {
+            println 'e2eStack: auth:9001 and api:8081 already up — skip runAll'
+        } else {
+            println 'e2eStack: starting runAll --parallel (background)'
+            def gradleUserHome = new File(stackDir, 'gradle-user-home')
+            def projectCache = new File(stackDir, 'project-cache')
+            gradleUserHome.mkdirs()
+            projectCache.mkdirs()
+
+            List<String> runAllCmd
+            if (isWindows) {
+                runAllCmd = [
+                        'cmd', '/c',
+                        "gradlew.bat runAll --parallel --no-daemon --project-cache-dir=\"${projectCache.absolutePath}\""
+                ]
+            } else {
+                runAllCmd = [
+                        './gradlew', 'runAll', '--parallel', '--no-daemon',
+                        "--project-cache-dir=${projectCache.absolutePath}"
+                ]
+            }
+            startDetached(runAllCmd, rootDir, runAllLog, [
+                    'GRADLE_USER_HOME': gradleUserHome.absolutePath
+            ])
+            waitForPort(9001, 180, 'rfr-auth')
+            waitForPort(8081, 180, 'rfr-api')
+        }
+
+        if (servicePortOpen(3001)) {
+            println 'e2eStack: frontend:3001 already up — skip npm run dev'
+        } else {
+            println 'e2eStack: npm ci && npm run dev (background)'
+            def frontDir = file('rfr-gql-client')
+            List<String> frontCmd = isWindows
+                    ? ['cmd', '/c', 'npm ci && npm run dev']
+                    : ['bash', '-c', 'npm ci && npm run dev']
+            startDetached(frontCmd, frontDir, frontLog, [:])
+            waitForPort(3001, 180, 'frontend')
+        }
+
+        println 'e2eStack: stack is up (left running). Logs: build/e2eStack/'
+    }
+}
+
+tasks.register('e2eStack') {
+    group = 'verification'
+    description = 'Bring up full local stack (keep running), then installPlaywrightWithDeps + runE2e'
+    dependsOn 'e2eStackUp', ':rfr-e2e:installPlaywrightWithDeps', 'runE2e'
+    outputs.upToDateWhen { false }
+
+}
+
+gradle.projectsEvaluated {
+    def installPw = project(':rfr-e2e').tasks.named('installPlaywrightWithDeps')
+    installPw.configure {
+        mustRunAfter rootProject.tasks.named('e2eStackUp')
+    }
+    rootProject.tasks.named('runE2e').configure {
+        mustRunAfter 'e2eStackUp', installPw
+    }
+}

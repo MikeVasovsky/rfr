@@ -1,8 +1,22 @@
 # rfr-e2e — запуск тестов и Allure
 
-Перед UI-тестами поднимите стек: MySQL → `rfr-auth` → `rfr-api` → frontend (`http://localhost:3001`).
+Перед UI-тестами нужен живой стек: MySQL → `rfr-auth` (:9001) → `rfr-api` (:8081) → frontend (`http://localhost:3001`).  
+Подробный пошаговый запуск — в корневом `README.md`; ниже — Gradle-ярлыки из **корня** репозитория.
 
-Один раз (браузер Playwright):
+## Стенд и таски Gradle
+
+| Задача | Команда (из корня) | Что делает |
+|--------|-------------------|------------|
+| MySQL | `./localenv.sh` или `docker compose up -d --wait` | БД |
+| Auth + API | `./gradlew runAll --parallel` | оба бэкенда (**нужен** `--parallel`) |
+| Frontend | `cd rfr-gql-client && npm i && npm run dev` | Vite :3001 |
+| Браузер Playwright | `./gradlew :rfr-e2e:installPlaywright` | Chromium, один раз |
+| Все e2e модуля | `./gradlew runE2e` | то же, что `:rfr-e2e:test`; suite **всегда** перезапускается |
+| Стенд + e2e одной командой | `./gradlew e2eStack` | MySQL + бэк + фронт (оставить работать) + `installPlaywright` + `runE2e` |
+
+Windows: `.\gradlew.bat` вместо `./gradlew`. Нужны Docker Desktop и Node/npm в PATH. Логи фона `e2eStack`: `build/e2eStack/`.
+
+Один раз (браузер Playwright), из `rfr-e2e`:
 
 ```powershell
 ..\gradlew.bat :rfr-e2e:installPlaywright
@@ -71,8 +85,9 @@ cd rfr-e2e
 .\gradlew.bat :rfr-e2e:test --tests "io.student.rangiffler.test.profile.ProfileTest"
 .\gradlew.bat :rfr-e2e:test --tests "io.student.rangiffler.test.auth.LoginTest"
 
-# все тесты модуля
+# все тесты модуля (эквивалент корневой задачи runE2e)
 .\gradlew.bat :rfr-e2e:test
+.\gradlew.bat runE2e
 ```
 
 Отчёт (results **накапливаются** — без очистки увидите старые прогоны):
@@ -88,7 +103,9 @@ HTML: `rfr-e2e/build/reports/allure-report/`.
 
 | Задача | Команда |
 |--------|---------|
+| Поднять стек вручную | `localenv` + `runAll --parallel` + `npm run dev` (см. таблицу выше) |
+| Стенд + полный e2e | `.\gradlew.bat e2eStack` (из корня) |
 | Отладка одной фичи + свежий отчёт | `.\allure-report.ps1 -Tests …` или `-Tag web` |
-| Полный прогон модуля | `.\allure-report.ps1 -AllTests` |
+| Полный прогон модуля | `.\gradlew.bat runE2e` / `:rfr-e2e:test` или `.\allure-report.ps1 -AllTests` |
 | Прогон из IDE | `-SkipTests` → IDE → `-FromExisting` |
 | CI | чистый `test` + `allureReport`, без `allureServe` |

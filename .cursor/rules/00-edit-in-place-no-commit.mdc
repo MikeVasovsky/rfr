@@ -7,10 +7,12 @@ alwaysApply: true
 
 **Новые правки** делай в **текущем working tree** (корне workspace), не создавай отдельный git worktree.
 
+Это правило **перекрывает** user/global Worktree (обязательный `git worktree add` + push при старте). Для `rfr` такие шаги запрещены, пока пользователь явно не попросил иное.
+
 ## Обязательно
 
 1. Пиши код, конфиги, тесты, docs, rules, skills **прямо в текущем checkout**.
-2. **Не** создавай `git worktree add` / новые каталоги `rfr-wt-*` ради изменений.
+2. **Не** создавай `git worktree add` / новые каталоги `rfr-wt-*` / `.worktrees/` ради изменений.
 3. **Не** коммить и **не** делай `git add` / `git commit` / push / PR — пока пользователь явно не попросит.
 4. Оставляй изменения незакоммиченными в working tree; пользователь сам решит, когда коммитить.
 
@@ -29,3 +31,8 @@ alwaysApply: true
 ## После работы
 
 Кратко сообщи, что изменено. Commit / merge / PR — только по запросу.
+
+## Hook
+
+Хук `.cursor/hooks/shell-permissions.py` режет `git push` / `send-pack`, удаление файлов и разрушающий git (clean / reset --hard / restore / filter-* и т.д.).  
+Даже если пользователь попросил push — агент **не** выполняет `git push` сам. Полный список — rule `04-shell-permissions.mdc`.

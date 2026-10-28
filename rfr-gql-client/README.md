@@ -144,7 +144,8 @@ npm ci          # или npm install
 npm run dev     # http://localhost:3001
 ```
 
-Для работы нужны запущенные `rfr-auth` (9001) и `rfr-api` (8081).
+Для работы нужны запущенные `rfr-auth` (9001) и `rfr-api` (8081) (и MySQL). Dev-сервер часто слушает только `localhost` / `[::1]` — открывай `http://localhost:3001`.  
+Порядок стека и короткие команды (`localenv`, `runAll`, `e2eStack`) — в корневом `README.md` («Быстрый старт»).
 
 Сборка и проверки:
 

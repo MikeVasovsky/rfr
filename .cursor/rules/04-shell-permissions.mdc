@@ -1,0 +1,39 @@
+---
+description: Shell permissions — start/stop stack OK; deny destructive delete/git wipe/push
+alwaysApply: true
+---
+
+# Shell permissions (rfr)
+
+Политика **git commit / worktree / PR** — в `.cursor/rules/00-edit-in-place-no-commit.mdc`.  
+Этот файл — **стек** и **разрушающие** shell-команды.
+
+## Разрешено без спроса у пользователя
+
+Агент **может** сам запускать и останавливать локальный стек и тесты:
+
+| Цель | Примеры |
+|------|---------|
+| БД | `./localenv.sh`, `docker compose up/stop/down mysql` |
+| Бэкенд | `./gradlew runAll --parallel`, `bootRun`; стоп `./ports.sh` / kill по портам |
+| Фронт | `npm run dev` / `npm ci` в `rfr-gql-client` |
+| Тесты | `./gradlew runE2e`, `e2eStack`, `:rfr-e2e:test` |
+
+Порядок: MySQL → auth+api → frontend. Тесты — против живого стека.
+
+## Запрещено (hook + политика)
+
+Вместо удаления файлов: только `*.bak` (`mv` / copy).
+
+**Удаление / затирание файлов:** `rm`, `rmdir`, `unlink`, `shred`, `srm`, `wipe`, `truncate`, `busybox`/`toybox` `rm|unlink`, `find -delete` / `-exec rm|unlink` / `-ok rm`.
+
+**Git (агент не делает):**
+- push / `send-pack` (любые флаги и force-refspec — пуш только пользователь);
+- `git rm`, `git clean`, `reset --hard`, `checkout --`, `restore`, `switch --discard-changes`;
+- `branch -D`, `tag -d`, `update-ref -d`, `filter-branch` / `filter-repo`, `reflog expire`, `gc --prune`.
+
+**Не режет hook (политика / по явной просьбе):** `git rebase`, `git commit --amend` — только если пользователь явно попросил и выполняются правила amend из user rules. `git receive-pack` и `receive.deny*` — настройки remote, не команда агента в этом репо.
+
+## Enforcement
+
+`.cursor/hooks.json` → `beforeShellExecution` → `.cursor/hooks/shell-permissions.py` (`failClosed`, без узкого matcher — проверка на каждую shell-команду).
