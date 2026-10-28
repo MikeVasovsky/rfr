@@ -1,29 +1,24 @@
 package io.student.rangiffler.data.db;
 
 import io.student.rangiffler.config.TestConfig;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 
 /**
- * Известные схемы Rangiffler: у каждой свой {@link DataSource} и {@link PlatformTransactionManager}.
+ * JDBC-схемы e2e: DataSource, {@link JdbcClient} и транзакции.
  */
 public enum Databases {
 
-  /** Схема {@code rangiffler-auth} (пользователи, authorities). */
-  AUTH(TestConfig.getInstance().authJdbcUrl()),
-  /** Схема {@code rangiffler-api} (users/countries и т.д. в API). */
-  API(TestConfig.getInstance().apiJdbcUrl());
+  AUTH(TestConfig.getInstance().authJdbcUrl());
 
   private final DataSource dataSource;
-  private final PlatformTransactionManager transactionManager;
+  private final JdbcClient jdbcClient;
+  private final TransactionTemplate transactionTemplate;
 
-  /**
-   * Собирает DataSource и transaction manager для JDBC URL схемы
-   * (credentials — из {@link TestConfig}).
-   */
   Databases(String jdbcUrl) {
     TestConfig cfg = TestConfig.getInstance();
     var ds = new DriverManagerDataSource();
@@ -32,16 +27,19 @@ public enum Databases {
     ds.setUsername(cfg.jdbcUser());
     ds.setPassword(cfg.jdbcPassword());
     this.dataSource = ds;
-    this.transactionManager = new DataSourceTransactionManager(ds);
+    this.jdbcClient = JdbcClient.create(ds);
+    this.transactionTemplate = new TransactionTemplate(new DataSourceTransactionManager(ds));
   }
 
-  /** Пул/источник соединений к этой схеме (для {@link JdbcClients}, {@link Sql}). */
   public DataSource dataSource() {
     return dataSource;
   }
 
-  /** Менеджер транзакций для {@link InTransaction} по этой схеме. */
-  public PlatformTransactionManager transactionManager() {
-    return transactionManager;
+  public JdbcClient jdbcClient() {
+    return jdbcClient;
+  }
+
+  public void run(Runnable action) {
+    transactionTemplate.executeWithoutResult(status -> action.run());
   }
 }
