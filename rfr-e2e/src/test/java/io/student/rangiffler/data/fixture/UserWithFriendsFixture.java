@@ -54,7 +54,8 @@ public final class UserWithFriendsFixture implements UserFixture {
 
   @Override
   public TestUser user() {
-    return delegate.user();
+    TestUser base = delegate.user();
+    return new TestUser(base.username(), base.password(), companions, base.incomeInvitations());
   }
 
   @Override
