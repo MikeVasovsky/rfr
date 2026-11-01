@@ -5,16 +5,17 @@ import io.student.rangiffler.model.TestProfile;
 import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.utils.RandomDataUtils;
 
+/**
+ * Тестовый профиль в api БД: {@link #create()} создаёт запись, {@link #close()} удаляет.
+ */
 public final class ProfileFixture implements AutoCloseable {
 
-    private final ApiProfile apiProfile;
-    private boolean closed;
     private final TestProfile profile;
+    private final TearDown tearDown;
 
-    private ProfileFixture(ApiProfile apiProfile,
-                           TestProfile profile) {
-        this.apiProfile = apiProfile;
+    private ProfileFixture(ApiProfile apiProfile, TestProfile profile) {
         this.profile = profile;
+        this.tearDown = new TearDown().with(apiProfile::delete);
     }
 
     public static ProfileFixture create() {
@@ -23,16 +24,12 @@ public final class ProfileFixture implements AutoCloseable {
         return new ProfileFixture(ApiProfile.create(user, profile), profile);
     }
 
-    public TestProfile profile(){
+    public TestProfile profile() {
         return profile;
     }
 
     @Override
     public void close() {
-        if (closed) {
-            return;
-        }
-        apiProfile.delete();
-        closed = true;
+        tearDown.close();
     }
 }

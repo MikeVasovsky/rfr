@@ -3,13 +3,13 @@
   "hooks": {
     "beforeShellExecution": [
       {
-        "command": ".cursor/hooks/shell-permissions.py",
+        "command": "python .cursor/hooks/shell-permissions.py",
         "failClosed": true
       }
     ],
     "postToolUse": [
       {
-        "command": ".cursor/hooks/compile-on-edit.py",
+        "command": "python .cursor/hooks/compile-on-edit.py",
         "matcher": "Write|StrReplace",
         "timeout": 200
       }

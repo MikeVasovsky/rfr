@@ -19,12 +19,11 @@ import static io.student.rangiffler.data.db.Databases.API;
 public final class UserWithFriendsFixture implements UserFixture {
 
   private final UserFixture delegate;
-  private final List<TestUser> friends;
-  private boolean closed;
+  private final TearDown tearDown;
 
-  private UserWithFriendsFixture(UserFixture delegate, List<TestUser> friends) {
+  private UserWithFriendsFixture(UserFixture delegate, TearDown tearDown) {
     this.delegate = delegate;
-    this.friends = friends;
+    this.tearDown = tearDown;
   }
 
   public static UserFixture wrap(UserFixture delegate, int friendship) {
@@ -42,7 +41,22 @@ public final class UserWithFriendsFixture implements UserFixture {
       ApiFriendship.create(delegateUserId, friendId, "ACCEPTED");
       friends.add(friend);
     }
-    return new UserWithFriendsFixture(delegate, friends);
+    TearDown tearDown = new TearDown()
+        .with(() -> {
+          byte[] id = findUserId(API.jdbcClient(), delegate.user());
+          if (id != null) {
+            ApiFriendship.deleteFriends(id);
+          }
+        })
+        .withEach(friends, friend -> ApiProfile.of(friend).delete())
+        .with(() -> {
+          byte[] id = findUserId(API.jdbcClient(), delegate.user());
+          if (id != null) {
+            ApiProfile.of(delegate.user()).delete();
+          }
+        })
+        .with(delegate::close);
+    return new UserWithFriendsFixture(delegate, tearDown);
   }
 
   @Override
@@ -52,22 +66,7 @@ public final class UserWithFriendsFixture implements UserFixture {
 
   @Override
   public void close() {
-    if (closed) {
-      return;
-    }
-    JdbcClient jdbc = API.jdbcClient();
-    byte[] delegateUserId = findUserId(jdbc, delegate.user());
-    if (delegateUserId != null) {
-      ApiFriendship.deleteFriends(delegateUserId);
-    }
-    for (TestUser friend : friends) {
-      ApiProfile.of(friend).delete();
-    }
-    if (delegateUserId != null) {
-      ApiProfile.of(delegate.user()).delete();
-    }
-    delegate.close();
-    closed = true;
+    tearDown.close();
   }
 
   private static byte[] requireUserId(JdbcClient jdbc, TestUser user) {

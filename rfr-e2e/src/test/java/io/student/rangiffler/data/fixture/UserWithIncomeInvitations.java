@@ -19,18 +19,11 @@ import static io.student.rangiffler.data.db.Databases.API;
 public final class UserWithIncomeInvitations implements UserFixture {
 
   private final UserFixture delegate;
-  private final List<TestUser> inviters;
-  private final boolean deleteMainProfile;
-  private boolean closed;
+  private final TearDown tearDown;
 
-  private UserWithIncomeInvitations(
-      UserFixture delegate,
-      List<TestUser> inviters,
-      boolean deleteMainProfile
-  ) {
+  private UserWithIncomeInvitations(UserFixture delegate, TearDown tearDown) {
     this.delegate = delegate;
-    this.inviters = inviters;
-    this.deleteMainProfile = deleteMainProfile;
+    this.tearDown = tearDown;
   }
 
   public static UserFixture wrap(UserFixture delegate, int incomeInvitations) {
@@ -49,7 +42,25 @@ public final class UserWithIncomeInvitations implements UserFixture {
       inviters.add(inviter);
     }
     boolean deleteMainProfile = !(delegate instanceof UserWithFriendsFixture);
-    return new UserWithIncomeInvitations(delegate, inviters, deleteMainProfile);
+    TearDown tearDown = new TearDown()
+        .with(() -> {
+          byte[] id = findUserId(API.jdbcClient(), delegate.user());
+          if (id != null) {
+            ApiFriendship.deleteInvitations(id);
+          }
+        })
+        .withEach(inviters, inviter -> ApiProfile.of(inviter).delete())
+        .with(() -> {
+          if (!deleteMainProfile) {
+            return;
+          }
+          byte[] id = findUserId(API.jdbcClient(), delegate.user());
+          if (id != null) {
+            ApiProfile.of(delegate.user()).delete();
+          }
+        })
+        .with(delegate::close);
+    return new UserWithIncomeInvitations(delegate, tearDown);
   }
 
   @Override
@@ -59,22 +70,7 @@ public final class UserWithIncomeInvitations implements UserFixture {
 
   @Override
   public void close() {
-    if (closed) {
-      return;
-    }
-    JdbcClient jdbc = API.jdbcClient();
-    byte[] delegateUserId = findUserId(jdbc, delegate.user());
-    if (delegateUserId != null) {
-      ApiFriendship.deleteInvitations(delegateUserId);
-    }
-    for (TestUser inviter : inviters) {
-      ApiProfile.of(inviter).delete();
-    }
-    if (deleteMainProfile && delegateUserId != null) {
-      ApiProfile.of(delegate.user()).delete();
-    }
-    delegate.close();
-    closed = true;
+    tearDown.close();
   }
 
   private static byte[] requireUserId(JdbcClient jdbc, TestUser user) {
