@@ -9,8 +9,12 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 public final class ApiProfile {
     private final TestUser user;
 
-    private  ApiProfile(TestUser user) {
+    private ApiProfile(TestUser user) {
         this.user = user;
+    }
+
+    public static ApiProfile of(TestUser user) {
+        return new ApiProfile(user);
     }
 
     public static ApiProfile create(TestUser u, TestProfile p) {
@@ -42,6 +46,14 @@ public final class ApiProfile {
                         .param(user.username())
                         .update()
         );
+    }
+
+    public static byte[] findUserId(JdbcClient jdbc, TestUser u) {
+        return jdbc.sql(Sql.load("sql/api/find_user_id.sql"))
+                .param(u.username())
+                .query((rs, rowNum) -> rs.getBytes("id"))
+                .optional()
+                .orElse(null);
     }
 
 }

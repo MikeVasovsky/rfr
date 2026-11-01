@@ -16,7 +16,7 @@ public final class SingleUserFixture implements UserFixture {
     this.account = account;
   }
 
-  public static SingleUserFixture create() {
+  public static UserFixture create() {
     return new SingleUserFixture(AuthAccount.create(RandomDataUtils.createUser()));
   }
 
