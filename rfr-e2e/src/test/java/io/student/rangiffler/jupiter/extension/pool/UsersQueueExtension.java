@@ -1,9 +1,9 @@
-package io.student.rangiffler.jupiter.extension;
+package io.student.rangiffler.jupiter.extension.pool;
 
 import io.qameta.allure.Allure;
-import io.student.rangiffler.data.fixture.StaticUserFixture;
+import io.student.rangiffler.data.fixture.pool.StaticUserFixture;
 import io.student.rangiffler.data.fixture.UserFixture;
-import io.student.rangiffler.jupiter.annotation.StaticUser;
+import io.student.rangiffler.jupiter.annotation.pool.StaticUser;
 import io.student.rangiffler.model.TestUser;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -16,7 +16,7 @@ import java.lang.reflect.Parameter;
 import java.util.Optional;
 
 /**
- * Жизненный цикл {@link StaticUserFixture}: пользователь из {@link io.student.rangiffler.data.fixture.UsersQueue}.
+ * Жизненный цикл {@link StaticUserFixture}: пользователь из {@link io.student.rangiffler.data.fixture.pool.UsersQueue}.
  * Фикстура кладётся в Store до {@code create()}, чтобы {@code close()} вернул пользователя при закрытии Store.
  */
 public final class UsersQueueExtension implements BeforeEachCallback, ParameterResolver, AfterEachCallback {

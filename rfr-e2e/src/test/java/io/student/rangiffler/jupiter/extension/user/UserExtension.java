@@ -1,9 +1,9 @@
-package io.student.rangiffler.jupiter.extension;
+package io.student.rangiffler.jupiter.extension.user;
 
 import io.qameta.allure.Allure;
-import io.student.rangiffler.data.UserRequest;
+import io.student.rangiffler.data.fixture.user.UserRequest;
 import io.student.rangiffler.data.fixture.UserFixture;
-import io.student.rangiffler.jupiter.annotation.User;
+import io.student.rangiffler.jupiter.annotation.user.User;
 import io.student.rangiffler.model.TestUser;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -36,11 +36,11 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
   private static final AtomicReference<Function<User, UserFixture>> FIXTURE_FACTORY =
       new AtomicReference<>(DEFAULT_FIXTURE_FACTORY);
 
-  static void installFixtureFactory(Function<User, UserFixture> factory) {
+  public static void installFixtureFactory(Function<User, UserFixture> factory) {
     FIXTURE_FACTORY.set(Objects.requireNonNull(factory, "factory"));
   }
 
-  static void resetFixtureFactory() {
+  public static void resetFixtureFactory() {
     FIXTURE_FACTORY.set(DEFAULT_FIXTURE_FACTORY);
   }
 

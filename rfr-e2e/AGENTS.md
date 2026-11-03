@@ -16,10 +16,10 @@
 - Page Objects — skill `page-object-tests` (`.cursor/skills/page-object-tests/SKILL.md`).
 - Вход только через UI; токены в `localStorage` не подставлять.
 - Проход через Playwright MCP ≠ зелёный тест; успех — JUnit через Gradle (`README.md`, `allure-report.ps1`).
-- Данные — фикстуры `@User` → `UserExtension` → `SingleUserFixture`, без широких `DELETE`/`TRUNCATE`.
-- Пул: `@StaticUser` → `UsersQueueExtension` → `StaticUserFixture` / `UsersQueue` (без create/delete в БД); skill `rfr-test-data`.
+- Данные `@User`: `annotation/user` → `extension/user` → `data/fixture/user` (`UserRequest`, `SingleUserFixture`, декораторы), без широких `DELETE`/`TRUNCATE`.
+- Пул `@StaticUser`: `annotation/pool` → `extension/pool` → `data/fixture/pool` (`UsersQueue`, `StaticUserFixture`; без create/delete в БД). Пакет `pool`, не `static` (keyword). Общий каркас: `data/fixture` (`UserFixture`, `TearDown`). Skill `rfr-test-data`.
 - Тестовые username — префикс `rfr_`; после suite в `friendship`/`user` (auth+api) строк `rfr_%` быть не должно.
-- Мишени `@ProbeTarget` (`@Tag("probe")`) — только через EngineTestKit из `UserExtensionTest`; suite исключает `probe` и `*Case`/`*Cases`.
+- EngineTestKit: мишени `jupiter/probe/user|pool/` (+ `ProbeReports`); оркестраторы `test/extension/user|pool/`. `@ProbeTarget` (`@Tag("probe")`) + exclude `probe`/`*Case` из suite.
 - JDBC: plumbing `data.db.Databases` / `Sql`; разделы БД — небольшие immutable-классы (`AuthAccount`, `Profile`, `Friendship`, `Friendships`) с `create`/`exists`/`delete`, не DAO.
 - Теги: UI — `web` (`BaseUiTest`), без стека — `fake` (в т.ч. EngineTestKit для `UserExtension` / `UsersQueueExtension`). Задача `:rfr-e2e:e2e` = тот же suite, что `test` (удобно `--tests '*TabTest'`). Новый тег сначала в README и в skill.
 - Пакетов `api` / `assertions` нет — не заводить без явной нужды. Конфиг URL — `TestConfig` / `-Drfr.*` (см. README).

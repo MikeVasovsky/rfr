@@ -1,11 +1,7 @@
-package io.student.rangiffler.data;
+package io.student.rangiffler.data.fixture.user;
 
-import io.student.rangiffler.data.fixture.SingleUserFixture;
 import io.student.rangiffler.data.fixture.UserFixture;
-import io.student.rangiffler.data.fixture.UserWithFriendsFixture;
-import io.student.rangiffler.data.fixture.UserWithIncomeInvitations;
-import io.student.rangiffler.data.fixture.UserWithOutcomeInvitationsFixture;
-import io.student.rangiffler.jupiter.annotation.User;
+import io.student.rangiffler.jupiter.annotation.user.User;
 
 public record UserRequest(int friends, int incomeInvitations, int outcomeInvitations) {
 

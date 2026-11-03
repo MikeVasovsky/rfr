@@ -1,4 +1,6 @@
-package io.student.rangiffler.data.fixture;
+package io.student.rangiffler.data.fixture.pool;
+
+import io.student.rangiffler.data.fixture.UserFixture;
 
 import io.student.rangiffler.model.TestUser;
 

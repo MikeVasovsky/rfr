@@ -1,5 +1,7 @@
-package io.student.rangiffler.data.fixture;
+package io.student.rangiffler.data.fixture.user;
 
+import io.student.rangiffler.data.fixture.UserFixture;
+import io.student.rangiffler.data.fixture.TearDown;
 import io.student.rangiffler.data.db.AuthAccount;
 import io.student.rangiffler.data.db.Friendships;
 import io.student.rangiffler.data.db.Profile;

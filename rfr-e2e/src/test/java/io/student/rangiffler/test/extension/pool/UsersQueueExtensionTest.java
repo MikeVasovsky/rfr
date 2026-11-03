@@ -1,22 +1,21 @@
-package io.student.rangiffler.jupiter.extension;
+package io.student.rangiffler.test.extension.pool;
 
-import io.student.rangiffler.data.fixture.UsersQueue;
-import io.student.rangiffler.jupiter.annotation.StaticUser;
-import io.student.rangiffler.model.TestUser;
+import io.student.rangiffler.data.fixture.pool.UsersQueue;
+import io.student.rangiffler.jupiter.extension.pool.UsersQueueExtension;
+import io.student.rangiffler.jupiter.probe.pool.FailingStaticUserCase;
+import io.student.rangiffler.jupiter.probe.pool.FourSequentialStaticUserCases;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.testkit.engine.Events;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.testkit.engine.EngineTestKit.engine;
 
 /**
- * Мишени {@link UsersQueueExtension} через EngineTestKit: пул из трёх и возврат после падения.
+ * Оркестратор EngineTestKit для {@link UsersQueueExtension}: мишени в {@code jupiter.probe.pool}.
  */
 @Tag("fake")
 class UsersQueueExtensionTest {
@@ -51,37 +50,5 @@ class UsersQueueExtensionTest {
     return engine("junit-jupiter")
         .selectors(selectClass(testClass))
         .execute();
-  }
-
-  @ExtendWith(UsersQueueExtension.class)
-  static class FourSequentialStaticUserCases {
-    @Test
-    void first(@StaticUser TestUser user) {
-      assertNotNull(user.username());
-    }
-
-    @Test
-    void second(@StaticUser TestUser user) {
-      assertNotNull(user.username());
-    }
-
-    @Test
-    void third(@StaticUser TestUser user) {
-      assertNotNull(user.username());
-    }
-
-    @Test
-    void fourth(@StaticUser TestUser user) {
-      assertNotNull(user.username());
-    }
-  }
-
-  @ExtendWith(UsersQueueExtension.class)
-  static class FailingStaticUserCase {
-    @Test
-    void fails(@StaticUser TestUser user) {
-      assertNotNull(user.username());
-      throw new RuntimeException("boom: " + user.username());
-    }
   }
 }

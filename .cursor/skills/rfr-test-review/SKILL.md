@@ -26,7 +26,7 @@ description: >-
 
 **Слои.** В jupiter нет SQL и локаторов; в data нет JUnit, SQL только в data/db, db не зависит от data; в test нет локаторов и SQL.
 
-**Каждый вывод подтверждён** пробой в `jupiter/extension/UserExtensionTest` или `UsersQueueExtensionTest` (EngineTestKit, exists() из db, цели Observed и Failing) или конкретной строкой кода; без найденной причины изменений не предлагать.
+**Каждый вывод подтверждён** пробой в `jupiter/probe/user|pool/*` через оркестраторы `test/extension/user|pool/*` (EngineTestKit, exists() из db, цели Observed и Failing) или конкретной строкой кода; без найденной причины изменений не предлагать.
 
 ## Формат ответа
 

@@ -1,4 +1,4 @@
-package io.student.rangiffler.jupiter.annotation;
+package io.student.rangiffler.jupiter.annotation.user;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

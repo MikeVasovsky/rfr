@@ -1,4 +1,6 @@
-package io.student.rangiffler.data.fixture;
+package io.student.rangiffler.data.fixture.user;
+
+import io.student.rangiffler.data.fixture.TearDown;
 
 import io.student.rangiffler.data.db.Profile;
 import io.student.rangiffler.model.TestProfile;

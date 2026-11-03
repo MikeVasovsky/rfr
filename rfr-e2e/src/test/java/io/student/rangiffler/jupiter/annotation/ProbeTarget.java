@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Мишень EngineTestKit для {@code UserExtensionTest}: не должна попадать в обычный suite.
+ * Мишень EngineTestKit для оркестраторов {@code test.extension.user|pool}: не должна попадать в обычный suite.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
