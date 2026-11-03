@@ -10,9 +10,11 @@
 | MySQL | `./localenv.sh` или `docker compose up -d --wait` | БД |
 | Auth + API | `./gradlew runAll --parallel` | оба бэкенда (**нужен** `--parallel`) |
 | Frontend | `cd rfr-gql-client && npm i && npm run dev` | Vite :3001 |
-| Браузер Playwright | `./gradlew :rfr-e2e:installPlaywright` | Chromium, один раз |
+| Браузер Playwright | `./gradlew :rfr-e2e:installPlaywright` | Chromium, один раз (локально) |
+| Браузер + OS deps | `./gradlew :rfr-e2e:installPlaywrightWithDeps` | Chromium с `--with-deps` (CI / Linux) |
 | Все e2e модуля | `./gradlew runE2e` | то же, что `:rfr-e2e:test`; suite **всегда** перезапускается |
-| Стенд + e2e одной командой | `./gradlew e2eStack` | MySQL + бэк + фронт (оставить работать) + `installPlaywright` + `runE2e` |
+| Alias e2e | `./gradlew :rfr-e2e:e2e --tests '*TabTest'` | тот же suite, удобный `--tests` |
+| Стенд + e2e одной командой | `./gradlew e2eStack` | MySQL + бэк + фронт (оставить работать) + `installPlaywrightWithDeps` + `runE2e` |
 
 Windows: `.\gradlew.bat` вместо `./gradlew`. Нужны Docker Desktop и Node/npm в PATH. Логи фона `e2eStack`: `build/e2eStack/`.
 
@@ -28,8 +30,8 @@ Windows: `.\gradlew.bat` вместо `./gradlew`. Нужны Docker Desktop и 
 
 | Тег | Что входит |
 |-----|------------|
-| `web` | UI-тесты (`BaseUiTest` и наследники в `auth` / `profile`) |
-| `fake` | Заглушка пайплайна без браузера (`SimpleTest`) |
+| `web` | UI-тесты (`BaseUiTest` и наследники в `auth` / `profile` / `people`) |
+| `fake` | Без браузера и живого стека: `SimpleTest`, EngineTestKit для `UserExtension` |
 
 Пакеты по домену: `test.auth`, `test.profile`, база — `test.BaseUiTest`. Новый UI-тест: наследуйте `BaseUiTest` (тег `web` уже на базе). Новый тег — сначала в эту таблицу и в skill PO.
 
