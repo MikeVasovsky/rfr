@@ -153,7 +153,10 @@ class UserExtensionTest {
       List<TestUser> incomeInvitations = IntStream.range(0, annotation.incomeInvitations())
           .mapToObj(i -> new TestUser("inviter-" + i, "pass"))
           .toList();
-      TestUser user = new TestUser("main", "secret", friends, incomeInvitations);
+      List<TestUser> outcomeInvitations = IntStream.range(0, annotation.outcomeInvitations())
+          .mapToObj(i -> new TestUser("invitee-" + i, "pass"))
+          .toList();
+      TestUser user = new TestUser("main", "secret", friends, incomeInvitations, outcomeInvitations);
       return new RecordingUserFixture(user, closed);
     });
   }
@@ -181,7 +184,8 @@ class UserExtensionTest {
         "event", "resolved",
         "username", user.username(),
         "friends", String.valueOf(user.friends().size()),
-        "incomeInvitations", String.valueOf(user.incomeInvitations().size())
+        "incomeInvitations", String.valueOf(user.incomeInvitations().size()),
+        "outcomeInvitations", String.valueOf(user.outcomeInvitations().size())
     ));
   }
 

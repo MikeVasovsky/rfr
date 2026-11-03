@@ -10,30 +10,30 @@ import io.student.rangiffler.utils.RandomDataUtils;
  */
 final class ApiUserSupport {
 
-  private ApiUserSupport() {
-  }
-
-  record CreatedApiUser(Profile handle, TestProfile profile) {
-    TestUser user() {
-      return handle.user();
+    private ApiUserSupport() {
     }
-  }
 
-  static Profile ensureProfile(TestUser user) {
-    Profile profile = Profile.of(user);
-    if (profile.exists()) {
-      return profile;
+    record CreatedApiUser(Profile handle, TestProfile profile) {
+        TestUser user() {
+            return handle.user();
+        }
     }
-    return Profile.create(user, RandomDataUtils.createProfile());
-  }
 
-  static CreatedApiUser createUserWithProfile() {
-    TestUser user = RandomDataUtils.createUser();
-    TestProfile profile = RandomDataUtils.createProfile();
-    return new CreatedApiUser(Profile.create(user, profile), profile);
-  }
+    static Profile ensureProfile(TestUser user) {
+        Profile profile = Profile.of(user);
+        if (profile.exists()) {
+            return profile;
+        }
+        return Profile.create(user, RandomDataUtils.createProfile());
+    }
 
-  static TestUser createRelatedUser() {
-    return createUserWithProfile().user();
-  }
+    static CreatedApiUser createUserWithProfile() {
+        TestUser user = RandomDataUtils.createUser();
+        TestProfile profile = RandomDataUtils.createProfile();
+        return new CreatedApiUser(Profile.create(user, profile), profile);
+    }
+
+    static TestUser createRelatedUser() {
+        return createUserWithProfile().user();
+    }
 }
