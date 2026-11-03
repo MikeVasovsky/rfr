@@ -13,10 +13,7 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.lang.reflect.Parameter;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 /**
  * Жизненный цикл тестового пользователя в auth БД:
@@ -30,20 +27,6 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
       ExtensionContext.Namespace.create(UserExtension.class);
   private static final String FIXTURE_KEY = "userFixture";
 
-  private static final Function<User, UserFixture> DEFAULT_FIXTURE_FACTORY =
-      annotation -> UserRequest.from(annotation).fixture();
-
-  private static final AtomicReference<Function<User, UserFixture>> FIXTURE_FACTORY =
-      new AtomicReference<>(DEFAULT_FIXTURE_FACTORY);
-
-  public static void installFixtureFactory(Function<User, UserFixture> factory) {
-    FIXTURE_FACTORY.set(Objects.requireNonNull(factory, "factory"));
-  }
-
-  public static void resetFixtureFactory() {
-    FIXTURE_FACTORY.set(DEFAULT_FIXTURE_FACTORY);
-  }
-
   @Override
   public void beforeEach(ExtensionContext context) {
     Parameter[] parameters = context.getRequiredTestMethod().getParameters();
@@ -51,7 +34,7 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
       User u = p.getAnnotation(User.class);
       if (u != null && TestUser.class.isAssignableFrom(p.getType())) {
         Allure.step("Создать пользователя в auth БД", () ->
-            store(context).put(FIXTURE_KEY, FIXTURE_FACTORY.get().apply(u))
+            store(context).put(FIXTURE_KEY, UserRequest.from(u).fixture())
         );
         break;
       }
