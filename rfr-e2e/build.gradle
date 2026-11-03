@@ -46,6 +46,8 @@ allure {
 }
 
 test {
+    // E2E against a live stack — always re-run (Gradle UP-TO-DATE would skip with no code changes).
+    outputs.upToDateWhen { false }
     useJUnitPlatform {
         def include = System.getProperty('includeTags')
         if (include) {
@@ -61,8 +63,10 @@ test {
     systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
 }
 
-tasks.register('installPlaywright', JavaExec) {
+tasks.register('installPlaywrightWithDeps', JavaExec){
+    group = 'e2e'
+    description = 'Install Chromium with OS dependencies'
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'com.microsoft.playwright.CLI'
-    args 'install', 'chromium'
+    args 'install', '--with-deps', 'chromium'
 }

@@ -224,13 +224,14 @@ UUID пользователя в `rangiffler-api` и `rangiffler-auth` неза�
 
 ```bash
 # из корня проекта: MySQL в Docker
-# внимание: localenv.sh останавливает и удаляет ВСЕ docker-контейнеры на машине
 bash localenv.sh
 
 cd rfr-api
 ../gradlew bootRun
 # или main class io.student.rangiffler.RangifflerApiApplication из IDE
 ```
+
+Оба бэкенда сразу (из корня): `./gradlew runAll --parallel` (Windows: `.\gradlew.bat runAll --parallel`; нужен живой `rfr-auth` и MySQL). Полный быстрый старт стенда — в корневом `README.md`.
 
 Проверка (access token можно взять в localStorage фронтенда после логина, ключ `access_token`):
 

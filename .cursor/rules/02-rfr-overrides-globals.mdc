@@ -1,0 +1,34 @@
+---
+description: Перекрывает конфликтующие user/global rules для репозитория rfr (Rangiffler).
+alwaysApply: true
+---
+
+# rfr перекрывает глобальные user rules
+
+Этот репозиторий — дипломный Spring Boot + React + e2e. При конфликте с `~/.cursor/rules` побеждают правила **ниже** и `.cursor/rules/00*`, `01*`, `AGENTS.md`.
+
+## Worktree и checkout
+
+Правки **только** в текущем working tree. **Не** создавай `git worktree`, **не** делай push при старте задачи. Глобальный раздел Worktree **не применяется**.
+
+## Git
+
+Коммит / `git add` / push / PR — **только** по явной просьбе пользователя. Без auto-push и без «ветки на каждую правку».
+
+## Архитектура и Objects
+
+Elegant Objects / «только interface + final + без getter» **не навязывай**. Следуй Spring Boot, JPA, GraphQL/DGS, существующему Java/React/MUI коду и `AGENTS.md`.
+
+## Testing
+
+- Юнит/интеграционные тесты бэкенда: можно ориентироваться на TDD, но не ломай принятый JUnit-стиль проекта.
+- **rfr-e2e** (Playwright + Allure + Page Object): следуй скиллу `.cursor/skills/page-object-tests` и паттернам модуля. Разрешены fixtures/`@BeforeEach`, shared page objects, несколько assertion’ов где нужно. Глобальные запреты setUp/tearDown и «один assertion» для e2e **не применяются**.
+- Тесты не запускай без спроса (как в global), если пользователь не попросил иначе.
+
+## Workflow / предложения
+
+Перед нетривиальными правками кода — 2–3 варианта и OK (см. `01-propose-before-implement.mdc`). Исключения из того же файла сохраняются (в т.ч. правки rules/skills по запросу).
+
+## Прочее из global — оставляем
+
+Communication, Files (`.bak`), RTK, CLI «если есть в PATH», узкий scope — действуют, если не противоречат пунктам выше.

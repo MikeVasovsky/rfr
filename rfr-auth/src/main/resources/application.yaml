@@ -18,6 +18,9 @@ spring:
   mvc:
     log-request-details: true
   web:
+    # Login/register UI is English; keep Spring Security exception messages stable for e2e.
+    locale: en_US
+    locale-resolver: fixed
     resources:
       cache:
         cachecontrol:

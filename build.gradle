@@ -43,3 +43,17 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs.add('-parameters')
 }
+
+tasks.register('runAll') {
+    group = 'application'
+    description = 'Run rfr-auth and rfr-api (use with --parallel)'
+    dependsOn ':rfr-auth:bootRun', ':rfr-api:bootRun'
+}
+
+tasks.register('runE2e') {
+    group = 'verification'
+    description = 'Run all rfr-e2e tests'
+    dependsOn ':rfr-e2e:test'
+}
+
+apply from: 'gradle/e2eStack.gradle'
