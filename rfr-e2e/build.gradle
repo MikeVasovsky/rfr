@@ -49,6 +49,11 @@ allure {
 test {
     // E2E against a live stack — always re-run (Gradle UP-TO-DATE would skip with no code changes).
     outputs.upToDateWhen { false }
+    // EngineTestKit fixtures (*Case / *Cases) must not run as suite tests; only via selectClass.
+    filter {
+        excludeTestsMatching '*Case'
+        excludeTestsMatching '*Cases'
+    }
     useJUnitPlatform {
         def include = System.getProperty('includeTags')
         if (include) {
