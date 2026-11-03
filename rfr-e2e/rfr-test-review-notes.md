@@ -164,9 +164,23 @@ Store держит только корень фикстуры (`@User` или `@
 
 ---
 
-## Предложение в skill `rfr-test-review`
+## Правило, добавленное в skill `rfr-test-review`
+
+Внесено в `.cursor/skills/rfr-test-review/SKILL.md`:
 
 **Слот пула — ресурс; очередь им не владеет.**  
-Взятый из `UsersQueue` пользователь принадлежит `StaticUserFixture` в Store (`put` до `acquire`/`create`, `close` возвращает только взятого). Статическая очередь хранит свободные слоты и ресурсом не владеет; `reset`/seed — только в тестах extension’а, не в UI-сценариях. Проба: после упавшего `@StaticUser`-теста размер пула восстановлен.
+Взятый из `UsersQueue` пользователь принадлежит `StaticUserFixture` в Store (`put` до `acquire`/`create`, `close` возвращает только взятого). Статическая очередь хранит свободные слоты и ресурсом не владеет; `reset`/seed — только в тестах extension’а, не в UI-сценариях. Проба: после упавшего `@StaticUser`-теста размер пула восстановлен (`UsersQueueExtensionTest`).
 
-Дополнительно имеет смысл поправить в skill путь `jupiter/probe/…` → фактический `jupiter/extension/UserExtensionTest` (и упомянуть `UsersQueueExtensionTest`).
+Также в skill путь проб обновлён: `jupiter/extension/UserExtensionTest` (+ `UsersQueueExtensionTest`), вместо устаревшего `jupiter/probe/…`.
+
+## Принятые замечания → закрытие тестом / мишенью
+
+| Принятое | Закрыто |
+|----------|---------|
+| Outcome: PENDING во время теста, cleanup после | `UserExtensionTest.createsOutcomeInvitationAndCleansItAfterTest` (Observed) |
+| Outcome: `−1` → IAE до create | `UserExtensionTest.failsWhenOutcomeInvitationsNegativeBeforeCreatingUser` (Failing) |
+| Слот пула возвращается после fail | `UsersQueueExtensionTest.returnsUserToQueueAfterFailedTest` |
+| Пул из 3 хватает на 4 подряд | `UsersQueueExtensionTest.fourSequentialTestsSucceedOnPoolOfThree` |
+| People: состав / чужие связи / кнопки / empty | `FriendsTabTest`, `IncomeInvitationsTabTest`, `OutcomeInvitationsTabTest` |
+
+Замечания 1–3, 6 (mid-create / TearDown / put-after-create) **не приняты в этом PR** — остаются техдолгом без Failing-мишеней.

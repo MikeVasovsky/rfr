@@ -12,6 +12,8 @@ description: >-
 
 **Владелец — дерево декораторов.** В Store лежит только корень UserFixture из UserRequest.fixture(), Store закрывает его как AutoCloseable; каждый декоратор владеет своим origin и partners. Поля extension'а, статика и ThreadLocal ресурсом не владеют.
 
+**Слот пула — ресурс; очередь им не владеет.** Взятый из `UsersQueue` пользователь принадлежит `StaticUserFixture` в Store (`put` до `acquire`/`create`, `close` возвращает только взятого). Статическая очередь хранит свободные слоты и ресурсом не владеет; `reset`/seed — только в тестах extension’а, не в UI-сценариях. Проба: после упавшего `@StaticUser`-теста размер пула восстановлен (`UsersQueueExtensionTest`).
+
 **Регистрация до частичной подготовки.** put в Store до create(); create() не атомарен (Account, Profile, партнёры, Friendship), поэтому close() обязан работать после падения на любом шаге.
 
 **Симметрия create/close.** Декоратор удаляет ровно то, что создал, адресно по username, в обратном порядке (свои строки → partners → origin) через Teardown, чтобы шаги были независимы и ошибки не терялись. Без широких DELETE/TRUNCATE.
@@ -24,7 +26,7 @@ description: >-
 
 **Слои.** В jupiter нет SQL и локаторов; в data нет JUnit, SQL только в data/db, db не зависит от data; в test нет локаторов и SQL.
 
-**Каждый вывод подтверждён** пробой в jupiter/probe/UserExtensionTest (EngineTestKit, exists() из db, цели Observed и Failing) или конкретной строкой кода; без найденной причины изменений не предлагать.
+**Каждый вывод подтверждён** пробой в `jupiter/extension/UserExtensionTest` или `UsersQueueExtensionTest` (EngineTestKit, exists() из db, цели Observed и Failing) или конкретной строкой кода; без найденной причины изменений не предлагать.
 
 ## Формат ответа
 
