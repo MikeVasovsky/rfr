@@ -1,30 +1,42 @@
 package io.student.rangiffler.data.fixture.user;
 
-import io.student.rangiffler.data.fixture.TearDown;
-
 import io.student.rangiffler.data.db.Profile;
+import io.student.rangiffler.data.fixture.TearDown;
 import io.student.rangiffler.model.TestProfile;
+import io.student.rangiffler.model.TestUser;
+import io.student.rangiffler.utils.RandomDataUtils;
 
 /**
- * Тестовый профиль в api БД: {@link #create()} создаёт запись, {@link #close()} удаляет.
+ * Владелец api-профиля: {@link #ensureFor} для уже существующего пользователя,
+ * {@link #createRelated} — новый партнёр с профилем; {@link #close()} удаляет только свой профиль.
  */
 public final class ProfileFixture implements AutoCloseable {
 
-  private final TestProfile profile;
+  private final Profile apiProfile;
   private final TearDown tearDown;
 
-  private ProfileFixture(Profile apiProfile, TestProfile profile) {
-    this.profile = profile;
-    this.tearDown = new TearDown().with(apiProfile::delete);
+  private ProfileFixture(Profile apiProfile, TearDown tearDown) {
+    this.apiProfile = apiProfile;
+    this.tearDown = tearDown;
   }
 
-  public static ProfileFixture create() {
-    ApiUserSupport.CreatedApiUser created = ApiUserSupport.createUserWithProfile();
-    return new ProfileFixture(created.handle(), created.profile());
+  public static Profile ensureFor(TestUser user) {
+    Profile profile = Profile.of(user);
+    if (profile.exists()) {
+      return profile;
+    }
+    return Profile.create(user, RandomDataUtils.createProfile());
   }
 
-  public TestProfile profile() {
-    return profile;
+  public static ProfileFixture createRelated() {
+    TestUser user = RandomDataUtils.createUser();
+    TestProfile profile = RandomDataUtils.createProfile();
+    Profile handle = Profile.create(user, profile);
+    return new ProfileFixture(handle, new TearDown().with(handle::delete));
+  }
+
+  public TestUser user() {
+    return apiProfile.user();
   }
 
   @Override

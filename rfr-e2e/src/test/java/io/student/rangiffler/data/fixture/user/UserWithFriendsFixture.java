@@ -1,10 +1,9 @@
 package io.student.rangiffler.data.fixture.user;
 
-import io.student.rangiffler.data.fixture.UserFixture;
-import io.student.rangiffler.data.fixture.TearDown;
 import io.student.rangiffler.data.db.Friendship;
 import io.student.rangiffler.data.db.Friendships;
-import io.student.rangiffler.data.db.Profile;
+import io.student.rangiffler.data.fixture.TearDown;
+import io.student.rangiffler.data.fixture.UserFixture;
 import io.student.rangiffler.model.TestUser;
 
 import java.util.ArrayList;
@@ -25,18 +24,19 @@ public final class UserWithFriendsFixture implements UserFixture {
 
   public static UserFixture wrap(UserFixture delegate, int friendship) {
     TestUser base = delegate.user();
-    ApiUserSupport.ensureProfile(base);
-    List<TestUser> friends = new ArrayList<>();
+    ProfileFixture.ensureFor(base);
+    List<ProfileFixture> friends = new ArrayList<>();
     for (int i = 0; i < friendship; i++) {
-      TestUser friend = ApiUserSupport.createRelatedUser();
-      Friendship.create(base, friend, Friendship.ACCEPTED);
+      ProfileFixture friend = ProfileFixture.createRelated();
+      Friendship.create(base, friend.user(), Friendship.ACCEPTED);
       friends.add(friend);
     }
     TearDown tearDown = new TearDown()
         .with(() -> Friendships.of(base).deleteFriends())
-        .withEach(friends, friend -> Profile.of(friend).delete())
+        .withEach(friends, ProfileFixture::close)
         .with(delegate::close);
-    return new UserWithFriendsFixture(base.withFriends(friends), tearDown);
+    List<TestUser> friendUsers = friends.stream().map(ProfileFixture::user).toList();
+    return new UserWithFriendsFixture(base.withFriends(friendUsers), tearDown);
   }
 
   @Override
