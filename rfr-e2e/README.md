@@ -29,8 +29,8 @@ Windows: `.\gradlew.bat` вместо `./gradlew`. Нужны Docker Desktop и 
 
 | Тег | Что входит |
 |-----|------------|
-| `web` | UI-тесты (`BaseUiTest` и наследники в `auth` / `profile`) |
-| `fake` | Заглушка пайплайна без браузера (`SimpleTest`) |
+| `web` | UI-тесты (`BaseUiTest` и наследники в `auth` / `profile` / `people`) |
+| `fake` | Без браузера и живого стека: `SimpleTest`, EngineTestKit для `UserExtension` |
 
 Пакеты по домену: `test.auth`, `test.profile`, база — `test.BaseUiTest`. Новый UI-тест: наследуйте `BaseUiTest` (тег `web` уже на базе). Новый тег — сначала в эту таблицу и в skill PO.
 
