@@ -5,7 +5,7 @@
  *   ./gradlew e2eStack
  *   .\gradlew.bat e2eStack
  *
- * MySQL → auth+api → frontend (background, left running) → installPlaywright → runE2e.
+ * MySQL → auth+api → frontend (background, left running) → installPlaywrightWithDeps → runE2e.
  */
 
 def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()

@@ -10,9 +10,10 @@
 | MySQL | `./localenv.sh` или `docker compose up -d --wait` | БД |
 | Auth + API | `./gradlew runAll --parallel` | оба бэкенда (**нужен** `--parallel`) |
 | Frontend | `cd rfr-gql-client && npm i && npm run dev` | Vite :3001 |
-| Браузер Playwright | `./gradlew :rfr-e2e:installPlaywright` | Chromium, один раз |
+| Браузер Playwright | `./gradlew :rfr-e2e:installPlaywright` | Chromium, один раз (локально) |
+| Браузер + OS deps | `./gradlew :rfr-e2e:installPlaywrightWithDeps` | Chromium с `--with-deps` (CI / Linux) |
 | Все e2e модуля | `./gradlew runE2e` | то же, что `:rfr-e2e:test`; suite **всегда** перезапускается |
-| Стенд + e2e одной командой | `./gradlew e2eStack` | MySQL + бэк + фронт (оставить работать) + `installPlaywright` + `runE2e` |
+| Стенд + e2e одной командой | `./gradlew e2eStack` | MySQL + бэк + фронт (оставить работать) + `installPlaywrightWithDeps` + `runE2e` |
 
 Windows: `.\gradlew.bat` вместо `./gradlew`. Нужны Docker Desktop и Node/npm в PATH. Логи фона `e2eStack`: `build/e2eStack/`.
 

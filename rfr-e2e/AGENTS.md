@@ -17,7 +17,7 @@
 - Вход только через UI; токены в `localStorage` не подставлять.
 - Проход через Playwright MCP ≠ зелёный тест; успех — JUnit через Gradle (`README.md`, `allure-report.ps1`).
 - Данные — фикстуры `@User` → `UserExtension` → `SingleUserFixture`, без широких `DELETE`/`TRUNCATE`.
-- JDBC: plumbing `data.db.Databases` / `Sql`; разделы БД — небольшие immutable-классы (`AuthAccount`), не DAO. `apiJdbcUrl` в конфиге — запас под будущие классы схемы api.
+- JDBC: plumbing `data.db.Databases` / `Sql`; разделы БД — небольшие immutable-классы (`AuthAccount`, `Profile`, `Friendship`, `Friendships`) с `create`/`exists`/`delete`, не DAO.
 - Теги: UI — `web` (`BaseUiTest`), заглушки — `fake`. Новый тег сначала в README и в skill.
 - Пакетов `api` / `assertions` нет — не заводить без явной нужды. Конфиг URL — `TestConfig` / `-Drfr.*` (см. README).
 - Без комментариев к методам/полям (имена + `@Step`); над классом — краткий Javadoc. В Gradle/SQL/properties — без лишних комментариев.

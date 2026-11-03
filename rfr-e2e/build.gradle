@@ -63,7 +63,15 @@ test {
     systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
 }
 
-tasks.register('installPlaywrightWithDeps', JavaExec){
+tasks.register('installPlaywright', JavaExec) {
+    group = 'e2e'
+    description = 'Install Chromium browser for Playwright'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.microsoft.playwright.CLI'
+    args 'install', 'chromium'
+}
+
+tasks.register('installPlaywrightWithDeps', JavaExec) {
     group = 'e2e'
     description = 'Install Chromium with OS dependencies'
     classpath = sourceSets.test.runtimeClasspath
