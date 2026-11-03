@@ -46,28 +46,39 @@ allure {
     }
 }
 
-test {
-    // E2E against a live stack — always re-run (Gradle UP-TO-DATE would skip with no code changes).
-    outputs.upToDateWhen { false }
-    // EngineTestKit fixtures (*Case / *Cases) must not run as suite tests; only via selectClass.
-    filter {
+def configureE2eSuite = { Test task ->
+    task.outputs.upToDateWhen { false }
+    // EngineTestKit fixtures (*Case / *Cases) and @ProbeTarget must not run as suite tests.
+    task.filter {
         excludeTestsMatching '*Case'
         excludeTestsMatching '*Cases'
     }
-    useJUnitPlatform {
+    task.useJUnitPlatform {
+        def exclude = ['probe'] as Set
+        def excludeProp = System.getProperty('excludeTags')
+        if (excludeProp) {
+            exclude.addAll(excludeProp.split(',')*.trim().findAll { it })
+        }
+        excludeTags(exclude as String[])
         def include = System.getProperty('includeTags')
         if (include) {
             includeTags(*(include.split(',')*.trim().findAll { it }))
         }
-        def exclude = System.getProperty('excludeTags')
-        if (exclude) {
-            excludeTags(*(exclude.split(',')*.trim().findAll { it }))
-        }
     }
-    jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
-    systemProperty 'rfr.frontUrl', System.getProperty('rfr.frontUrl', 'http://localhost:3001')
-    systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
+    task.jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
+    task.systemProperty 'rfr.frontUrl', System.getProperty('rfr.frontUrl', 'http://localhost:3001')
+    task.systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
 }
+
+tasks.named('test', Test).configure(configureE2eSuite)
+
+tasks.register('e2e', Test) {
+    group = 'verification'
+    description = 'Run e2e tests (same suite as test; supports --tests)'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+}
+tasks.named('e2e', Test).configure(configureE2eSuite)
 
 tasks.register('installPlaywright', JavaExec) {
     group = 'e2e'

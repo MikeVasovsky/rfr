@@ -4,6 +4,7 @@ import io.student.rangiffler.data.UserRequest;
 import io.student.rangiffler.data.db.Friendship;
 import io.student.rangiffler.data.db.Profile;
 import io.student.rangiffler.data.fixture.UserFixture;
+import io.student.rangiffler.jupiter.annotation.ProbeTarget;
 import io.student.rangiffler.jupiter.annotation.User;
 import io.student.rangiffler.model.TestUser;
 import org.junit.jupiter.api.AfterEach;
@@ -251,6 +252,7 @@ class UserExtensionTest {
     }
   }
 
+  @ProbeTarget
   @ExtendWith(UserExtension.class)
   static class PlainUserCase {
     @Test
@@ -259,6 +261,7 @@ class UserExtensionTest {
     }
   }
 
+  @ProbeTarget
   @ExtendWith(UserExtension.class)
   static class FriendsUserCase {
     @Test
@@ -267,6 +270,7 @@ class UserExtensionTest {
     }
   }
 
+  @ProbeTarget
   @ExtendWith(UserExtension.class)
   static class IncomeInvitationsUserCase {
     @Test
@@ -275,6 +279,7 @@ class UserExtensionTest {
     }
   }
 
+  @ProbeTarget
   @ExtendWith(UserExtension.class)
   static class FriendsAndInvitationsUserCase {
     @Test
@@ -283,6 +288,7 @@ class UserExtensionTest {
     }
   }
 
+  @ProbeTarget
   @ExtendWith(UserExtension.class)
   static class NoUserCase {
     @Test
@@ -292,6 +298,7 @@ class UserExtensionTest {
   }
 
   /** beforeEach не создаёт fixture (нет {@code @User}); резолв TestUser делегируется в UserExtension.store. */
+  @ProbeTarget
   @ExtendWith({UserExtension.class, ForceUserResolveExtension.class})
   static class BrokenSupportsOnlyCase {
     @Test
@@ -300,6 +307,7 @@ class UserExtensionTest {
     }
   }
 
+  @ProbeTarget
   @ExtendWith(UserExtension.class)
   static class OutcomeInvitationObservedCase {
     @Test
@@ -315,6 +323,7 @@ class UserExtensionTest {
     }
   }
 
+  @ProbeTarget
   @ExtendWith(UserExtension.class)
   static class NegativeOutcomeInvitationsCase {
     @Test

@@ -21,18 +21,14 @@ import static org.junit.platform.testkit.engine.EngineTestKit.engine;
 @Tag("fake")
 class UsersQueueExtensionTest {
 
-  private static final TestUser POOL_USER_1 = new TestUser("static-one", "pass-one");
-  private static final TestUser POOL_USER_2 = new TestUser("static-two", "pass-two");
-  private static final TestUser POOL_USER_3 = new TestUser("static-three", "pass-three");
-
   @BeforeEach
   void fillPool() {
-    UsersQueue.reset(POOL_USER_1, POOL_USER_2, POOL_USER_3);
+    UsersQueue.resetToDefaultPool();
   }
 
   @AfterEach
-  void clearPool() {
-    UsersQueue.reset();
+  void restorePool() {
+    UsersQueue.resetToDefaultPool();
   }
 
   @Test

@@ -2,6 +2,7 @@ package io.student.rangiffler.data.fixture;
 
 import io.student.rangiffler.model.TestUser;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -12,8 +13,17 @@ import java.util.concurrent.TimeUnit;
  */
 public final class UsersQueue {
 
+  public static final TestUser POOL_USER_1 = new TestUser("static-one", "pass-one");
+  public static final TestUser POOL_USER_2 = new TestUser("static-two", "pass-two");
+  public static final TestUser POOL_USER_3 = new TestUser("static-three", "pass-three");
+  public static final List<TestUser> DEFAULT_POOL = List.of(POOL_USER_1, POOL_USER_2, POOL_USER_3);
+
   private static final long TIMEOUT_SECONDS = 5;
   private static final BlockingQueue<TestUser> USERS = new LinkedBlockingQueue<>();
+
+  static {
+    reset(DEFAULT_POOL.toArray(TestUser[]::new));
+  }
 
   private UsersQueue() {
   }
@@ -45,6 +55,10 @@ public final class UsersQueue {
     for (TestUser user : users) {
       release(user);
     }
+  }
+
+  public static void resetToDefaultPool() {
+    reset(DEFAULT_POOL.toArray(TestUser[]::new));
   }
 
   public static int size() {
