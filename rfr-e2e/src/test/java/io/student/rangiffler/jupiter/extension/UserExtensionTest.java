@@ -1,5 +1,8 @@
 package io.student.rangiffler.jupiter.extension;
 
+import io.student.rangiffler.data.UserRequest;
+import io.student.rangiffler.data.db.Friendship;
+import io.student.rangiffler.data.db.Profile;
 import io.student.rangiffler.data.fixture.UserFixture;
 import io.student.rangiffler.jupiter.annotation.User;
 import io.student.rangiffler.model.TestUser;
@@ -144,6 +147,39 @@ class UserExtensionTest {
     );
   }
 
+  @Test
+  void createsOutcomeInvitationAndCleansItAfterTest() {
+    Events testEvents = execute(OutcomeInvitationObservedCase.class).testEvents();
+
+    testEvents.assertStatistics(stats -> stats.started(1).succeeded(1));
+    Map<String, String> observed = requireReported(testEvents, Map.of("event", "outcome-observed"));
+    TestUser user = new TestUser(observed.get("username"), "unused");
+    TestUser invitee = new TestUser(observed.get("invitee"), "unused");
+
+    assertFalse(Friendship.of(user, invitee, Friendship.PENDING).exists());
+    assertFalse(Profile.of(invitee).exists());
+  }
+
+  @Test
+  void failsWhenOutcomeInvitationsNegativeBeforeCreatingUser() {
+    UserExtension.installFixtureFactory(annotation -> {
+      UserRequest request = UserRequest.from(annotation);
+      creations.incrementAndGet();
+      return request.fixture();
+    });
+
+    Events testEvents = execute(NegativeOutcomeInvitationsCase.class).testEvents();
+
+    testEvents.assertStatistics(stats -> stats.started(1).failed(1));
+    assertEquals(0, creations.get());
+    testEvents.assertThatEvents().haveExactly(1,
+        event(test(), finishedWithFailure(
+            instanceOf(IllegalArgumentException.class),
+            message(m -> m.contains("outcomeInvitations"))
+        ))
+    );
+  }
+
   private void installRecordingFactory() {
     UserExtension.installFixtureFactory(annotation -> {
       creations.incrementAndGet();
@@ -168,15 +204,21 @@ class UserExtensionTest {
   }
 
   private static void assertReported(Events testEvents, Map<String, String> expected) {
+    requireReported(testEvents, expected);
+  }
+
+  private static Map<String, String> requireReported(Events testEvents, Map<String, String> expected) {
     List<Map<String, String>> published = new ArrayList<>();
     for (Event event : testEvents.reportingEntryPublished().list()) {
       ReportEntry entry = event.getRequiredPayload(ReportEntry.class);
       published.add(entry.getKeyValuePairs());
     }
-    assertTrue(
-        published.stream().anyMatch(actual -> actual.entrySet().containsAll(expected.entrySet())),
-        () -> "expected reporting entry containing " + expected + " but was " + published
-    );
+    return published.stream()
+        .filter(actual -> actual.entrySet().containsAll(expected.entrySet()))
+        .findFirst()
+        .orElseThrow(() -> new AssertionError(
+            "expected reporting entry containing " + expected + " but was " + published
+        ));
   }
 
   private static void publishUser(TestReporter reporter, TestUser user) {
@@ -254,6 +296,29 @@ class UserExtensionTest {
   static class BrokenSupportsOnlyCase {
     @Test
     void cannotResolve(TestUser user) {
+      throw new AssertionError("must not run: " + user);
+    }
+  }
+
+  @ExtendWith(UserExtension.class)
+  static class OutcomeInvitationObservedCase {
+    @Test
+    void observesPendingFriendship(@User(outcomeInvitations = 1) TestUser user, TestReporter reporter) {
+      TestUser invitee = user.outcomeInvitations().get(0);
+      assertTrue(Friendship.of(user, invitee, Friendship.PENDING).exists());
+      assertTrue(Profile.of(invitee).exists());
+      reporter.publishEntry(Map.of(
+          "event", "outcome-observed",
+          "username", user.username(),
+          "invitee", invitee.username()
+      ));
+    }
+  }
+
+  @ExtendWith(UserExtension.class)
+  static class NegativeOutcomeInvitationsCase {
+    @Test
+    void rejectsNegative(@User(outcomeInvitations = -1) TestUser user) {
       throw new AssertionError("must not run: " + user);
     }
   }
