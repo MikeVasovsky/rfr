@@ -94,7 +94,10 @@ def main() -> int:
     try:
         payload = json.load(sys.stdin)
     except Exception:
-        _allow()
+        _deny(
+            "Shell permission hook received invalid JSON.",
+            "Hook input was not valid JSON; command blocked (fail-closed).",
+        )
         return 0
 
     command = payload.get("command") or ""
@@ -153,5 +156,8 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception:
-        _allow()
+        _deny(
+            "Shell permission hook failed.",
+            "Hook raised an unexpected error; command blocked (fail-closed).",
+        )
         raise SystemExit(0)

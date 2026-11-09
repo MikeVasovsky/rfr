@@ -26,17 +26,23 @@ public final class UserWithOutcomeInvitationsFixture implements UserFixture {
     TestUser base = delegate.user();
     ProfileFixture.ensureFor(base);
     List<ProfileFixture> invitees = new ArrayList<>();
-    for (int i = 0; i < outcomeInvitations; i++) {
-      ProfileFixture invitee = ProfileFixture.createRelated();
-      Friendship.create(base, invitee.user(), Friendship.PENDING);
-      invitees.add(invitee);
-    }
     TearDown tearDown = new TearDown()
-        .with(() -> Friendships.of(base).deleteInvitations())
-        .withEach(invitees, ProfileFixture::close)
-        .with(delegate::close);
-    List<TestUser> inviteeUsers = invitees.stream().map(ProfileFixture::user).toList();
-    return new UserWithOutcomeInvitationsFixture(base.withOutcomeInvitations(inviteeUsers), tearDown);
+            .with(() -> Friendships.of(base).deleteInvitations());
+    try {
+      for (int i = 0; i < outcomeInvitations; i++) {
+        ProfileFixture invitee = ProfileFixture.createRelated();
+        tearDown.with(invitee::close);
+        invitees.add(invitee);
+        Friendship.create(base, invitee.user(), Friendship.PENDING);
+      }
+      tearDown.with(delegate::close);
+      List<TestUser> inviteeUsers = invitees.stream().map(ProfileFixture::user).toList();
+      return new UserWithOutcomeInvitationsFixture(base.withOutcomeInvitations(inviteeUsers), tearDown);
+    }catch (Exception e){
+      tearDown.with(delegate::close).close();
+    throw e;
+    }
+
   }
 
   @Override

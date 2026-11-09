@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
+import io.student.rangiffler.utils.GraphqlResponses;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static io.student.rangiffler.utils.LocatorOptions.exactLocatorRole;
@@ -37,7 +38,7 @@ public final class PeoplePage {
 
   @Step("Открыть страницу People")
   public PeoplePage open() {
-    page.navigate(URL);
+    GraphqlResponses.waitForSuccess(page, "GetFriends", () -> page.navigate(URL));
     return this;
   }
 
@@ -49,19 +50,22 @@ public final class PeoplePage {
 
   @Step("Открыть вкладку Friends")
   public PeoplePage clickFriendsTab() {
-    friendsTab.click();
+    if ("true".equals(friendsTab.getAttribute("aria-selected"))) {
+      return this;
+    }
+    GraphqlResponses.waitForSuccess(page, "GetFriends", friendsTab::click);
     return this;
   }
 
   @Step("Открыть вкладку Income invitations")
   public PeoplePage clickIncomeInvitationsTab() {
-    incomeInvitationsTab.click();
+    GraphqlResponses.waitForSuccess(page, "GetInvitations", incomeInvitationsTab::click);
     return this;
   }
 
   @Step("Открыть вкладку Outcome invitations")
   public PeoplePage clickOutcomeInvitationsTab() {
-    outcomeInvitationsTab.click();
+    GraphqlResponses.waitForSuccess(page, "GetOutcomeInvitations", outcomeInvitationsTab::click);
     return this;
   }
 
