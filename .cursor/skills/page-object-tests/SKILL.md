@@ -40,6 +40,8 @@ description: >-
 
 15. Группы тестов — через JUnit `@Tag` (не свои аннотации). UI-тесты наследуют `@Tag("web")` с `BaseUiTest`; не-UI заглушки — `@Tag("fake")`. Новый класс вне иерархии `BaseUiTest` помечай тегом явно. Запуск группы: `-DincludeTags=web` или `.\allure-report.ps1 -Tag web`. Допустимые теги и команды — в `rfr-e2e/README.md`; новый тег сначала добавь в README и в этот пункт skill.
 
+16. Каждый `@Test` — с `@DisplayName("…")` (человекочитаемое имя сценария для отчёта). Шаги проверок в тесте обязательно именовать через `Allure.step("…", () -> …)`: не оставлять голые цепочки `checkThat…` / assert без текста шага. Имя шага говорит, *что проверяем* (как в `LoginTest` / `ProfileTest`). Методы `checkThat…` на Page Object по-прежнему с `@Step` (п. 4).
+
 ## Where code lives
 
 - Config: `rfr-e2e/.../config/TestConfig.java`
