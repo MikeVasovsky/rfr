@@ -21,7 +21,7 @@
 - Тестовые username — префикс `rfr_`; после suite в `friendship`/`user` (auth+api) строк `rfr_%` быть не должно.
 - EngineTestKit: мишени `jupiter/probe/user|pool/` (+ `ProbeReports`); оркестраторы `test/extension/user|pool/`. `@ProbeTarget` (`@Tag("probe")`) + exclude `probe`/`*Case` из suite.
 - JDBC: plumbing `data.db.Databases` / `Sql`; разделы БД — небольшие immutable-классы (`AuthAccount`, `Profile`, `Friendship`, `Friendships`) с `create`/`exists`/`delete`, не DAO.
-- Suite guard: `jupiter/extension/suite/StandSchemaExtension` (ServiceLoader) один раз сверяет Flyway файлов `rfr-auth`/`rfr-api` с `flyway_schema_history` в локальных БД (`data.db.FlywayAlignment`); при mismatch — fail с CTA перезапустить стек.
-- Теги: UI — `web` (`BaseUiTest`), без стека — `fake` (в т.ч. EngineTestKit для `UserExtension` / `UsersQueueExtension`). Задача `:rfr-e2e:e2e` = тот же suite, что `test` (удобно `--tests '*TabTest'`). Новый тег сначала в README и в skill.
+- Suite guard (эксперимент HW04-1): сверка Flyway в `test/RangifflerE2eSuite` `@BeforeSuite` → `FlywayAlignment`; `StandSchemaExtension` временно не в ServiceLoader. Задача `:rfr-e2e:e2e` — только `junit-platform-suite` + `*RangifflerE2eSuite`. Заметки: `hw04-task1-before-suite-notes.md`.
+- Теги: UI — `web` (`BaseUiTest`), без стека — `fake` (в т.ч. EngineTestKit для `UserExtension` / `UsersQueueExtension`). Новый тег сначала в README и в skill.
 - Пакетов `api` / `assertions` нет — не заводить без явной нужды. Конфиг URL — `TestConfig` / `-Drfr.*` (см. README).
 - Без комментариев к методам/полям (имена + `@Step`); над классом — краткий Javadoc. В Gradle/SQL/properties — без лишних комментариев.

@@ -71,15 +71,39 @@ def configureE2eSuite = { Test task ->
     task.systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
 }
 
-tasks.named('test', Test).configure(configureE2eSuite)
+tasks.named('test', Test).configure {
+    configureE2eSuite(it)
+    // @Suite-класс не должен подхватываться Jupiter в обычном test (иначе дубли с suite-engine).
+    filter {
+        excludeTestsMatching '*Suite'
+    }
+}
 
 tasks.register('e2e', Test) {
     group = 'verification'
-    description = 'Run e2e tests (same suite as test; supports --tests)'
+    description = 'Run e2e through RangifflerE2eSuite (junit-platform-suite)'
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
 }
-tasks.named('e2e', Test).configure(configureE2eSuite)
+tasks.named('e2e', Test).configure {
+    configureE2eSuite(it)
+    filter {
+        includeTestsMatching '*RangifflerE2eSuite'
+    }
+    useJUnitPlatform {
+        includeEngines 'junit-platform-suite'
+        def exclude = ['probe'] as Set
+        def excludeProp = System.getProperty('excludeTags')
+        if (excludeProp) {
+            exclude.addAll(excludeProp.split(',')*.trim().findAll { it })
+        }
+        excludeTags(exclude as String[])
+        def include = System.getProperty('includeTags')
+        if (include) {
+            includeTags(*(include.split(',')*.trim().findAll { it }))
+        }
+    }
+}
 
 tasks.register('installPlaywright', JavaExec) {
     group = 'e2e'
