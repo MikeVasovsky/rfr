@@ -30,10 +30,10 @@ Windows: `.\gradlew.bat` вместо `./gradlew`. Нужны Docker Desktop и 
 
 | Тег | Что входит |
 |-----|------------|
-| `web` | UI-тесты (`BaseUiTest` и наследники в `auth` / `profile` / `people`) |
-| `fake` | Без браузера и живого стека: `SimpleTest`, EngineTestKit для `UserExtension` |
+| `ui` | UI-тесты (`BaseUiTest` и наследники в `auth` / `profile` / `people`) |
+| `fake` | Без браузера и живого стека: `SimpleTest`, EngineTestKit для extension'ов |
 
-Пакеты по домену: `test.auth`, `test.profile`, база — `test.BaseUiTest`. Новый UI-тест: наследуйте `BaseUiTest` (тег `web` уже на базе). Новый тег — сначала в эту таблицу и в skill PO.
+Пакеты по домену: `test.auth`, `test.profile`, база — `test.BaseUiTest`. Новый UI-тест: наследуйте `BaseUiTest` (тег `ui` уже на базе). Новый тег — сначала в эту таблицу и в skill PO.
 
 ## Рекомендуемый способ (очистка + прогон + отчёт)
 
@@ -43,7 +43,7 @@ Windows: `.\gradlew.bat` вместо `./gradlew`. Нужны Docker Desktop и 
 cd rfr-e2e
 
 # вся группа UI
-.\allure-report.ps1 -Tag web
+.\allure-report.ps1 -Tag ui
 
 # один класс
 .\allure-report.ps1 -Tests io.student.rangiffler.test.profile.ProfileTest
@@ -52,7 +52,7 @@ cd rfr-e2e
 .\allure-report.ps1 -AllTests
 
 # только HTML без браузера Allure
-.\allure-report.ps1 -Tag web -NoServe
+.\allure-report.ps1 -Tag ui -NoServe
 ```
 
 Уже прогнали тесты вручную — только отчёт:
@@ -75,10 +75,10 @@ cd rfr-e2e
 
 ```powershell
 # группа по тегу
-.\gradlew.bat :rfr-e2e:test -DincludeTags=web
+.\gradlew.bat :rfr-e2e:test -DincludeTags=ui
 
 # несколько тегов
-.\gradlew.bat :rfr-e2e:test "-DincludeTags=web,fake"
+.\gradlew.bat :rfr-e2e:test "-DincludeTags=ui,fake"
 
 # исключить тег
 .\gradlew.bat :rfr-e2e:test -DexcludeTags=fake
@@ -107,7 +107,7 @@ HTML: `rfr-e2e/build/reports/allure-report/`.
 |--------|---------|
 | Поднять стек вручную | `localenv` + `runAll --parallel` + `npm run dev` (см. таблицу выше) |
 | Стенд + полный e2e | `.\gradlew.bat e2eStack` (из корня) |
-| Отладка одной фичи + свежий отчёт | `.\allure-report.ps1 -Tests …` или `-Tag web` |
+| Отладка одной фичи + свежий отчёт | `.\allure-report.ps1 -Tests …` или `-Tag ui` |
 | Полный прогон модуля | `.\gradlew.bat runE2e` / `:rfr-e2e:test` или `.\allure-report.ps1 -AllTests` |
 | Прогон из IDE | `-SkipTests` → IDE → `-FromExisting` |
 | CI | чистый `test` + `allureReport`, без `allureServe` |

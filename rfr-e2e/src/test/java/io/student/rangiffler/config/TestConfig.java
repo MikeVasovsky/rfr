@@ -5,6 +5,7 @@ import java.util.Locale;
 /**
  * Единая конфигурация e2e: URL сервисов и параметры Playwright.
  * Приоритет: system property {@code rfr.<key>} → env {@code RFR_<KEY>} → fallback-константа.
+ * Значения читаются на каждый вызов (удобно для EngineTestKit и -D в прогоне).
  */
 public final class TestConfig {
 
@@ -22,35 +23,12 @@ public final class TestConfig {
   private static final String DEFAULT_VIEWPORT_WIDTH = "1280";
   private static final String DEFAULT_VIEWPORT_HEIGHT = "720";
   private static final String DEFAULT_TIMEOUT_MS = "15000";
+  private static final String DEFAULT_STAND_TIMEOUT_SECONDS = "180";
+  private static final String DEFAULT_STAND_CHECK = "true";
 
   private static final TestConfig INSTANCE = new TestConfig();
 
-  private final String frontUrl;
-  private final String authUrl;
-  private final String apiUrl;
-  private final String authJdbcUrl;
-  private final String apiJdbcUrl;
-  private final String jdbcUser;
-  private final String jdbcPassword;
-  private final String browser;
-  private final boolean headless;
-  private final int viewportWidth;
-  private final int viewportHeight;
-  private final double defaultTimeoutMs;
-
   private TestConfig() {
-    frontUrl = value("frontUrl", DEFAULT_FRONT_URL);
-    authUrl = value("authUrl", DEFAULT_AUTH_URL);
-    apiUrl = value("apiUrl", DEFAULT_API_URL);
-    authJdbcUrl = value("authJdbcUrl", DEFAULT_AUTH_JDBC_URL);
-    apiJdbcUrl = value("apiJdbcUrl", DEFAULT_API_JDBC_URL);
-    jdbcUser = value("jdbcUser", DEFAULT_JDBC_USER);
-    jdbcPassword = value("jdbcPassword", DEFAULT_JDBC_PASSWORD);
-    browser = value("browser", DEFAULT_BROWSER);
-    headless = Boolean.parseBoolean(value("headless", DEFAULT_HEADLESS));
-    viewportWidth = Integer.parseInt(value("viewportWidth", DEFAULT_VIEWPORT_WIDTH));
-    viewportHeight = Integer.parseInt(value("viewportHeight", DEFAULT_VIEWPORT_HEIGHT));
-    defaultTimeoutMs = Double.parseDouble(value("defaultTimeoutMs", DEFAULT_TIMEOUT_MS));
   }
 
   public static TestConfig getInstance() {
@@ -58,51 +36,59 @@ public final class TestConfig {
   }
 
   public String frontUrl() {
-    return frontUrl;
+    return value("frontUrl", DEFAULT_FRONT_URL);
   }
 
   public String authUrl() {
-    return authUrl;
+    return value("authUrl", DEFAULT_AUTH_URL);
   }
 
   public String apiUrl() {
-    return apiUrl;
+    return value("apiUrl", DEFAULT_API_URL);
   }
 
   public String authJdbcUrl() {
-    return authJdbcUrl;
+    return value("authJdbcUrl", DEFAULT_AUTH_JDBC_URL);
   }
 
   public String apiJdbcUrl() {
-    return apiJdbcUrl;
+    return value("apiJdbcUrl", DEFAULT_API_JDBC_URL);
   }
 
   public String jdbcUser() {
-    return jdbcUser;
+    return value("jdbcUser", DEFAULT_JDBC_USER);
   }
 
   public String jdbcPassword() {
-    return jdbcPassword;
+    return value("jdbcPassword", DEFAULT_JDBC_PASSWORD);
   }
 
   public String browser() {
-    return browser;
+    return value("browser", DEFAULT_BROWSER);
   }
 
   public boolean headless() {
-    return headless;
+    return Boolean.parseBoolean(value("headless", DEFAULT_HEADLESS));
   }
 
   public int viewportWidth() {
-    return viewportWidth;
+    return Integer.parseInt(value("viewportWidth", DEFAULT_VIEWPORT_WIDTH));
   }
 
   public int viewportHeight() {
-    return viewportHeight;
+    return Integer.parseInt(value("viewportHeight", DEFAULT_VIEWPORT_HEIGHT));
   }
 
   public double defaultTimeoutMs() {
-    return defaultTimeoutMs;
+    return Double.parseDouble(value("defaultTimeoutMs", DEFAULT_TIMEOUT_MS));
+  }
+
+  public long standTimeoutSeconds() {
+    return Long.parseLong(value("standTimeout", DEFAULT_STAND_TIMEOUT_SECONDS));
+  }
+
+  public boolean standCheck() {
+    return Boolean.parseBoolean(value("standCheck", DEFAULT_STAND_CHECK));
   }
 
   static String value(String key, String fallback) {

@@ -69,6 +69,10 @@ def configureE2eSuite = { Test task ->
     task.jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
     task.systemProperty 'rfr.frontUrl', System.getProperty('rfr.frontUrl', 'http://localhost:3001')
     task.systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
+    task.systemProperty 'rfr.apiUrl', System.getProperty('rfr.apiUrl', 'http://localhost:8081')
+    task.systemProperty 'rfr.standTimeout', System.getProperty('rfr.standTimeout', '180')
+    task.systemProperty 'rfr.standCheck', System.getProperty('rfr.standCheck', 'true')
+    task.systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'true')
 }
 
 tasks.named('test', Test).configure(configureE2eSuite)

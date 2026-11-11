@@ -32,6 +32,8 @@ description: >-
 
 **Extension безопасен для любого тестового метода.** Нельзя опираться на то, что extension зарегистрирован только над «своими» тестами с нужной аннотацией/параметром. Callback'и (`beforeEach` / `afterEach` / resolver и т.д.) обязаны быть no-op или иначе безопасны, когда метод без `@User` / `@StaticUser` / нужного параметра: без NPE, без лишних create/delete, без порчи Store и без предположения «раз меня вызвали — значит ресурс нужен». Код должен выдерживать регистрацию на тестовом **классе** и **глобально** через `junit-platform.properties` (включая autodetection ServiceLoader), когда Jupiter вызывает extension и для чужих методов suite. Ошибка ревью: ранний обязательный side-effect без проверки аннотации/параметра; жёсткая привязка к одному probe/UI-классу; падение на методе без предусловия.
 
+**Реализации `SuiteExtension` — только ServiceLoader.** `StandReadinessExtension`, `StandSchemaExtension`, `AllureEnvironmentExtension` и другие impl `SuiteExtension` регистрируются через `META-INF/services/org.junit.jupiter.api.extension.Extension` (при `junit.jupiter.extensions.autodetection.enabled=true`). Подключение через `@ExtendWith` / meta с `@ExtendWith` / `@RegisterExtension` на тестовом классе — **ошибка** ревью (ломает единый suite-порядок и обходит SPI). Проба: временный `@ExtendWith(StandReadinessExtension.class)` должен дать это замечание.
+
 **Каждый вывод подтверждён** пробой в `jupiter/probe/user|pool/*` через оркестраторы `test/extension/user|pool/*` (EngineTestKit, exists() из db, цели Observed и Failing) или конкретной строкой кода; без найденной причины изменений не предлагать.
 
 ## Формат ответа
