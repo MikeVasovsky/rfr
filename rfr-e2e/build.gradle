@@ -35,7 +35,7 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "org.junit.platform:junit-platform-suite"
     testImplementation "org.junit.platform:junit-platform-testkit"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    testImplementation "org.junit.platform:junit-platform-launcher"
     testRuntimeOnly "org.aspectj:aspectjrt:$aspectJVersion"
 }
 
@@ -49,6 +49,8 @@ allure {
 
 def configureE2eSuite = { Test task ->
     task.outputs.upToDateWhen { false }
+    // HW04-2 experiment: one LauncherSession per Gradle worker JVM.
+    task.maxParallelForks = 2
     // EngineTestKit fixtures (*Case / *Cases) and @ProbeTarget must not run as suite tests.
     task.filter {
         excludeTestsMatching '*Case'
@@ -69,6 +71,7 @@ def configureE2eSuite = { Test task ->
     task.jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
     task.systemProperty 'rfr.frontUrl', System.getProperty('rfr.frontUrl', 'http://localhost:3001')
     task.systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
+    task.systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'true')
 }
 
 tasks.named('test', Test).configure(configureE2eSuite)
