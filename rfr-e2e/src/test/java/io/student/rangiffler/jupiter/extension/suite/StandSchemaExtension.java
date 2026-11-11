@@ -6,12 +6,12 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
  * Suite-level guard: до тестов сверяет Flyway-версии локальных БД с миграциями бэкендов в checkout.
- * Регистрация — ServiceLoader ({@code META-INF/services/...Extension}).
+ * Регистрация в обычном режиме — ServiceLoader ({@code META-INF/services/...Extension}).
  */
-public final class SuiteExtension implements BeforeAllCallback {
+public final class StandSchemaExtension implements BeforeAllCallback {
 
   private static final ExtensionContext.Namespace NAMESPACE =
-      ExtensionContext.Namespace.create(SuiteExtension.class);
+      ExtensionContext.Namespace.create(StandSchemaExtension.class);
   private static final String CHECK_KEY = "flywayAlignment";
 
   @Override
