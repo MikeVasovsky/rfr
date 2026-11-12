@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
@@ -28,8 +29,11 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 
 /**
  * EngineTestKit-мишень: после прогона во временном каталоге есть {@code environment.properties}.
+ * {@link Isolated}: подмена {@code rfr.*} / {@code allure.results.directory} не должна
+ * пересекаться с параллельным suite.
  */
 @Tag("fake")
+@Isolated
 @Execution(ExecutionMode.SAME_THREAD)
 @ResourceLock(value = Resources.SYSTEM_PROPERTIES, mode = ResourceAccessMode.READ_WRITE)
 class AllureEnvironmentExtensionTest {

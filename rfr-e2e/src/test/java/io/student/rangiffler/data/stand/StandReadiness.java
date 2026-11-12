@@ -29,6 +29,7 @@ public final class StandReadiness {
   private static final long POLL_SLEEP_MS = 500L;
   private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
   private static final HttpClient HTTP = HttpClient.newBuilder()
+      .version(HttpClient.Version.HTTP_1_1)
       .connectTimeout(REQUEST_TIMEOUT)
       .build();
 

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
@@ -31,8 +32,11 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 
 /**
  * EngineTestKit-мишени для {@code StandReadinessExtension} на подставном HTTP-сервере.
+ * {@link Isolated}: оркестратор подменяет {@code rfr.*} system properties; без изоляции
+ * параллельный UI-{@code beforeSuite} может опрашивать stub и ломать счётчик hits.
  */
 @Tag("fake")
+@Isolated
 @Execution(ExecutionMode.SAME_THREAD)
 @ResourceLock(value = Resources.SYSTEM_PROPERTIES, mode = ResourceAccessMode.READ_WRITE)
 class StandReadinessExtensionTest {
