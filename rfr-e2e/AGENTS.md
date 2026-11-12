@@ -21,7 +21,7 @@
 - Тестовые username — префикс `rfr_`; после suite в `friendship`/`user` (auth+api) строк `rfr_%` быть не должно.
 - EngineTestKit: мишени `jupiter/probe/user|pool|stand/` (+ `ProbeReports`); оркестраторы `test/extension/user|pool|stand/`. `@ProbeTarget` (`@Tag("probe")`) + exclude `probe`/`*Case` из suite.
 - JDBC: plumbing `data.db.Databases` / `Sql`; разделы БД — небольшие immutable-классы (`AuthAccount`, `Profile`, `Friendship`, `Friendships`) с `create`/`exists`/`delete`, не DAO.
-- Suite guards (ServiceLoader, порядок в `META-INF/services/...Extension`): `StandReadinessExtension` (ждёт стенд перед `@Tag("ui")`) → `StandSchemaExtension` (Flyway). Каркас — `SuiteExtension`. Пробы — `data/stand`; скрипт тех же проверок — `scripts/wait-for-stand.sh`. Выключить ожидание: `-Drfr.standCheck=false`; Flyway в мишенях: `-Drfr.schemaCheck=false`.
+- Suite guards (ServiceLoader, порядок в `META-INF/services/...Extension`): `StandReadinessExtension` (ждёт стенд перед `@Tag("ui")`) → `StandSchemaExtension` (Flyway). Каркас — `SuiteExtension`. Опрос стенда — один класс `data/stand/StandReadiness` (`awaitFrom`); скрипт тех же проверок — `scripts/wait-for-stand.sh`. Выключить ожидание: `-Drfr.standCheck=false`; Flyway в мишенях: `-Drfr.schemaCheck=false`.
 - Теги: UI — `ui` (`BaseUiTest`), без стека — `fake` (в т.ч. EngineTestKit). Задача `:rfr-e2e:e2e` = тот же suite, что `test` (удобно `--tests '*TabTest'`). Новый тег сначала в README и в skill.
 - Пакетов `api` / `assertions` нет — не заводить без явной нужды. Конфиг URL — `TestConfig` / `-Drfr.*` (см. README).
 - Без комментариев к методам/полям (имена + `@Step`); над классом — краткий Javadoc. В Gradle/SQL/properties — без лишних комментариев.
