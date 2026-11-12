@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
  * Suite-level extension: {@link #beforeSuite} один раз через root Store;
- * {@link #afterSuite} — при закрытии root Store ({@link ExtensionContext.Store.CloseableResource}).
+ * {@link #afterSuite} — при закрытии root Store (значение {@link AutoCloseable} в Store).
  * Реализации регистрируются только через ServiceLoader ({@code META-INF/services/...Extension}).
  */
 public interface SuiteExtension extends BeforeAllCallback, AfterAllCallback {

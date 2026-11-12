@@ -31,6 +31,17 @@ public final class FlywayAlignment {
     );
   }
 
+  /**
+   * Прикладные версии Flyway через запятую; при недоступной БД — {@code unavailable}.
+   */
+  public static String appliedLabel(Databases database) {
+    try {
+      return String.join(",", appliedVersions(database).stream().sorted().toList());
+    } catch (RuntimeException ignored) {
+      return "unavailable";
+    }
+  }
+
   private static void check(String schemaLabel, Databases database, Path migrationDir) {
     List<String> expected = expectedVersions(schemaLabel, migrationDir);
     List<String> applied = appliedVersions(database).stream().sorted().toList();

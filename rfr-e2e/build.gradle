@@ -47,6 +47,20 @@ allure {
     }
 }
 
+def shortCommit = {
+    try {
+        def proc = new ProcessBuilder('git', 'rev-parse', '--short', 'HEAD')
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(true)
+            .start()
+        def text = proc.inputStream.text.trim()
+        proc.waitFor()
+        return proc.exitValue() == 0 ? text : ''
+    } catch (Exception ignored) {
+        return ''
+    }
+}()
+
 def configureE2eSuite = { Test task ->
     task.outputs.upToDateWhen { false }
     // EngineTestKit fixtures (*Case / *Cases) and @ProbeTarget must not run as suite tests.
@@ -73,6 +87,7 @@ def configureE2eSuite = { Test task ->
     task.systemProperty 'rfr.standTimeout', System.getProperty('rfr.standTimeout', '180')
     task.systemProperty 'rfr.standCheck', System.getProperty('rfr.standCheck', 'true')
     task.systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'true')
+    task.systemProperty 'rfr.commit', System.getProperty('rfr.commit', shortCommit)
 }
 
 tasks.named('test', Test).configure(configureE2eSuite)
