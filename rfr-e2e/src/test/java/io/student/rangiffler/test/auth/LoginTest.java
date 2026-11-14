@@ -1,6 +1,7 @@
 package io.student.rangiffler.test.auth;
 
 import io.qameta.allure.Allure;
+import io.student.rangiffler.jupiter.annotation.UiTest;
 import io.student.rangiffler.jupiter.annotation.user.User;
 import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.page.MyTravelsPage;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 /**
  * UI-тест авторизации пользователя, заранее созданного в auth БД через {@link User}.
  */
+@UiTest
 public class LoginTest extends AuthUiTest {
 
   @Test

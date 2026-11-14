@@ -6,6 +6,7 @@ import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.page.LandingPage;
 import io.student.rangiffler.page.MyTravelsPage;
 import io.student.rangiffler.page.PeoplePage;
+import io.student.rangiffler.jupiter.annotation.UiTest;
 import io.student.rangiffler.test.BaseUiTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 /**
  * UI-проверки вкладки Outcome invitations: состав, отсутствие чужих связей, Waiting.../Cancel, пустое состояние.
  */
+@UiTest
 public class OutcomeInvitationsTabTest extends BaseUiTest {
 
   @Test

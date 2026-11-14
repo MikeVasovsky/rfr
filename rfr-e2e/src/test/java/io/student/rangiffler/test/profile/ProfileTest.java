@@ -6,6 +6,7 @@ import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.page.LandingPage;
 import io.student.rangiffler.page.MyTravelsPage;
 import io.student.rangiffler.page.ProfilePage;
+import io.student.rangiffler.jupiter.annotation.UiTest;
 import io.student.rangiffler.test.BaseUiTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
  * Позитивные UI-сценарии профиля ({@code /profile}) на пользователе из {@link User}:
  * сохранение полей, Reset к сохранённому, детерминированная смена страны.
  */
+@UiTest
 public class ProfileTest extends BaseUiTest {
 
   private static final String DEFAULT_LOCATION = "Russian Federation";

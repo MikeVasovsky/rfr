@@ -7,6 +7,7 @@ import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.page.LandingPage;
 import io.student.rangiffler.page.MyTravelsPage;
 import io.student.rangiffler.page.ProfilePage;
+import io.student.rangiffler.jupiter.annotation.UiTest;
 import io.student.rangiffler.test.BaseUiTest;
 import io.student.rangiffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Негативные UI-сценарии страницы {@code /profile}: валидация, read-only username, Reset, доступ без сессии.
  */
+@UiTest
 public class ProfileNegativeTest extends BaseUiTest {
 
   private static final String DEFAULT_LOCATION = "Russian Federation";
