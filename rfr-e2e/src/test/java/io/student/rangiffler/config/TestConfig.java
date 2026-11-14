@@ -22,7 +22,7 @@ public final class TestConfig {
   private static final String DEFAULT_HEADLESS = "true";
   private static final String DEFAULT_VIEWPORT_WIDTH = "1280";
   private static final String DEFAULT_VIEWPORT_HEIGHT = "720";
-  private static final String DEFAULT_TIMEOUT_MS = "15000";
+  private static final String DEFAULT_TIMEOUT_MS = "5000";
   private static final String DEFAULT_STAND_TIMEOUT_SECONDS = "180";
   private static final String DEFAULT_STAND_CHECK = "true";
 

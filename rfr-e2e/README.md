@@ -31,7 +31,7 @@ Windows: `.\gradlew.bat` вместо `./gradlew`. Нужны Docker Desktop и 
 | Тег | Что входит |
 |-----|------------|
 | `ui` | UI-тесты через `BaseUiTest` (stand / `-DincludeTags=ui`) |
-| `UI` | тот же набор через мета-аннотацию `@UiTest` на каждом `*Test` |
+| `UI` | мета-аннотация `@UiTest` на каждом UI-`*Test` |
 | `fake` | Без браузера и живого стека: `SimpleTest`, EngineTestKit для extension'ов |
 
 Пакеты по домену: `test.auth`, `test.profile`, база — `test.BaseUiTest`. Новый UI-тест: наследуйте `BaseUiTest` и пометьте класс `@UiTest`. Новый тег — сначала в эту таблицу и в skill PO.

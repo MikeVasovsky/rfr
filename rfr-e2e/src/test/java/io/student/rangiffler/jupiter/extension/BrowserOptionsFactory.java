@@ -6,7 +6,8 @@ import com.microsoft.playwright.junit.OptionsFactory;
 import io.student.rangiffler.config.TestConfig;
 
 /**
- * Опции Playwright для {@code @UsePlaywright}: headless, viewport и атрибут {@code data-test-id}.
+ * Опции Playwright для {@code @UsePlaywright}: browser, headless, viewport, {@code data-test-id}.
+ * Сейчас UI-suite поднимает браузер в {@code BaseUiTest}; фабрика — для явного {@code @UsePlaywright}.
  */
 public final class BrowserOptionsFactory implements OptionsFactory {
 
@@ -15,6 +16,7 @@ public final class BrowserOptionsFactory implements OptionsFactory {
   @Override
   public Options getOptions() {
     return new Options()
+        .setBrowserName(CFG.browser())
         .setHeadless(CFG.headless())
         .setTestIdAttribute("data-test-id")
         .setContextOptions(
