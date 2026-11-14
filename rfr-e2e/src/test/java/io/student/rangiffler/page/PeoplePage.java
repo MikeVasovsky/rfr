@@ -5,15 +5,13 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
+import io.student.rangiffler.page.component.PeopleTable;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
-import static io.student.rangiffler.utils.LocatorOptions.exactLocatorRole;
-import static io.student.rangiffler.utils.LocatorOptions.exactLocatorText;
 import static io.student.rangiffler.utils.LocatorOptions.exactRole;
-import static io.student.rangiffler.utils.LocatorOptions.exactText;
 
 /**
- * Страница People ({@code /people}): вкладки Friends / Income / Outcome invitations и таблица пользователей.
+ * Страница People ({@code /people}): вкладки и таблица пользователей ({@link PeopleTable}).
  */
 public final class PeoplePage {
 
@@ -23,16 +21,18 @@ public final class PeoplePage {
   private final Locator friendsTab;
   private final Locator incomeInvitationsTab;
   private final Locator outcomeInvitationsTab;
-  private final Locator emptyUsersMessage;
-  private final Locator tableRows;
+  private final PeopleTable peopleTable;
 
   public PeoplePage(Page page) {
     this.page = page;
     this.friendsTab = page.getByRole(AriaRole.TAB, exactRole("Friends"));
     this.incomeInvitationsTab = page.getByRole(AriaRole.TAB, exactRole("Income invitations"));
     this.outcomeInvitationsTab = page.getByRole(AriaRole.TAB, exactRole("Outcome invitations"));
-    this.emptyUsersMessage = page.getByText("There are no users yet", exactText());
-    this.tableRows = page.getByRole(AriaRole.ROW);
+    this.peopleTable = new PeopleTable(page);
+  }
+
+  public PeopleTable peopleTable() {
+    return peopleTable;
   }
 
   @Step("Открыть страницу People")
@@ -67,51 +67,37 @@ public final class PeoplePage {
 
   @Step("Проверить, что в таблице {expectedCount} пользователей")
   public PeoplePage checkThatUsersCount(int expectedCount) {
-    assertThat(tableRows).hasCount(expectedCount + 1);
+    peopleTable.checkThatUsersCount(expectedCount);
     return this;
   }
 
   @Step("Проверить пустой список пользователей")
   public PeoplePage checkThatNoUsersYet() {
-    assertThat(emptyUsersMessage).isVisible();
+    peopleTable.checkThatNoUsersYet();
     return this;
   }
 
   @Step("Проверить, что пользователь {username} отсутствует в таблице")
   public PeoplePage checkThatUserAbsent(String username) {
-    assertThat(userRow(username)).hasCount(0);
+    peopleTable.checkThatUserAbsent(username);
     return this;
   }
 
   @Step("Проверить друга {username}: строка и кнопка Remove")
   public PeoplePage checkThatFriend(String username) {
-    Locator row = userRow(username);
-    assertThat(row).isVisible();
-    assertThat(row.getByRole(AriaRole.BUTTON, exactLocatorRole("Remove"))).isVisible();
+    peopleTable.row(username).checkThatFriend();
     return this;
   }
 
   @Step("Проверить входящее invitation {username}: строка и кнопки Accept / Decline")
   public PeoplePage checkThatIncomeInvitation(String username) {
-    Locator row = userRow(username);
-    assertThat(row).isVisible();
-    assertThat(row.getByRole(AriaRole.BUTTON, exactLocatorRole("Accept"))).isVisible();
-    assertThat(row.getByRole(AriaRole.BUTTON, exactLocatorRole("Decline"))).isVisible();
+    peopleTable.row(username).checkThatIncomeInvitation();
     return this;
   }
 
   @Step("Проверить исходящее invitation {username}: строка, Waiting... и Cancel")
   public PeoplePage checkThatOutcomeInvitation(String username) {
-    Locator row = userRow(username);
-    assertThat(row).isVisible();
-    assertThat(row.getByText("Waiting...", exactLocatorText())).isVisible();
-    assertThat(row.getByRole(AriaRole.BUTTON, exactLocatorRole("Cancel"))).isVisible();
+    peopleTable.row(username).checkThatOutcomeInvitation();
     return this;
-  }
-
-  private Locator userRow(String username) {
-    return page.getByRole(AriaRole.ROW)
-        .filter(new Locator.FilterOptions()
-            .setHas(page.getByText(username, exactText())));
   }
 }

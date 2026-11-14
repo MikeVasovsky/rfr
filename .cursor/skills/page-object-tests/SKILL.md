@@ -22,7 +22,9 @@ description: >-
 
 6. Одно бизнес-действие — один метод, имя которого называет форму: это пример необязательно называть так, называй по логике действия на странице `fillLoginForm(username, password)`, `fillRegistrationForm(...)`. Без безликих `fillForm`/`fill`/`submit` и цепочек `fillUsername().fillPassword()`; отдельный метод на поле — только если тесту нужно именно поле (валидация).
 
-7. Действие отдельно от проверки: `fill…`/`click…` ничего не проверяют; `checkThat…` только проверяют через `PlaywrightAssertions.assertThat(locator)` и ничего не кликают. Без `locator.isVisible()` в JUnit-проверках и ручных ожиданий.
+7. Действие отдельно от проверки: `fill…`/`click…` ничего не проверяют; `checkThat…` только проверяют и ничего не кликают.
+   **Assertions — только Playwright web-first:** `PlaywrightAssertions.assertThat(page|locator|apiResponse)` (`isVisible`, `hasText`, `hasURL`, …).
+   **Запрещено** любые другие проверки в UI Page Object / UI-тестах: `org.junit.jupiter.api.Assertions` / `assertEquals` / `assertTrue`, AssertJ, Hamcrest, TestNG Assert, `locator.isVisible()` / `isHidden()` / `count()` / `textContent()` + ручной assert, `waitForTimeout`, самописные poll/retry. Состояние страницы ждут только web-first assertions и auto-wait у `click`/`fill`.
 
 8. Без `checkThatOpened`, `checkPageLoaded`, `isLoaded`, `waitUntilLoaded`: `click`/`fill` ждут элемент, web-first assertions ждут состояние. URL и видимость страницы проверяем, только когда переход и есть предмет теста.
 
@@ -46,7 +48,7 @@ description: >-
 
 - Config: `rfr-e2e/.../config/TestConfig.java`
 - Pages: `rfr-e2e/.../page/`
-- Components: `rfr-e2e/.../page/component/`
+- Components: `rfr-e2e/.../page/component/` (`HeaderComponent`, `CredentialsForm`, `PeopleTable` → `PeopleRow`)
 - Locator helpers: `rfr-e2e/.../utils/LocatorOptions.java`
 - UI tests: `rfr-e2e/.../test/{auth,profile}/` (+ `BaseUiTest` in `test/`)
 - Browser lifecycle: `BaseUiTest` (`@Tag("ui")`); action-timeout — `BrowserTimeoutExtension`; маркер класса — `@UiTest`
