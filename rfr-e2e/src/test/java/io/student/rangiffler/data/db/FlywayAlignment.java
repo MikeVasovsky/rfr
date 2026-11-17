@@ -1,16 +1,18 @@
 package io.student.rangiffler.data.db;
 
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.output.ValidateOutput;
+import org.flywaydb.core.api.output.ValidateResult;
 import org.springframework.dao.DataAccessException;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
- * Сверка Flyway-версий SQL бэкендов в checkout с {@code flyway_schema_history} локальных БД.
+ * Сверка миграций checkout с локальными БД через Flyway {@code validateWithResult}
+ * (версии и контрольные суммы) и подпись применённых версий для Allure.
  */
 public final class FlywayAlignment {
 
@@ -43,46 +45,52 @@ public final class FlywayAlignment {
   }
 
   private static void check(String schemaLabel, Databases database, Path migrationDir) {
-    List<String> expected = expectedVersions(schemaLabel, migrationDir);
-    List<String> applied = appliedVersions(database).stream().sorted().toList();
-    if (expected.equals(applied)) {
-      return;
-    }
-    throw new IllegalStateException("""
-        Flyway schema mismatch for %s (%s).
-        Expected from checkout %s: %s
-        Applied in local DB: %s
-
-        Call to action:
-        1) Переключил ветку без рестарта MySQL / rfr-auth / rfr-api — код и схема разъехались.
-        2) Перезапусти бэкенды (`./gradlew runAll --parallel`), чтобы Flyway накатил миграции.
-        3) Если схема чужая — пересоздай БД (`./localenv.sh`) и снова подними auth+api.
-        """.formatted(
-        schemaLabel,
-        database.name(),
-        migrationDir.toAbsolutePath().normalize(),
-        expected,
-        applied
-    ));
-  }
-
-  private static List<String> expectedVersions(String schemaLabel, Path migrationDir) {
     if (!Files.isDirectory(migrationDir)) {
       throw new IllegalStateException(
           "Нет каталога миграций " + schemaLabel + ": " + migrationDir.toAbsolutePath()
       );
     }
-    try (Stream<Path> files = Files.list(migrationDir)) {
-      return files
-          .filter(Files::isRegularFile)
-          .map(path -> path.getFileName().toString())
-          .map(fileName -> parseVersion(fileName))
-          .filter(Objects::nonNull)
-          .sorted()
-          .toList();
-    } catch (IOException e) {
-      throw new IllegalStateException("Не удалось прочитать миграции " + migrationDir, e);
+    Path migrations = migrationDir.toAbsolutePath().normalize();
+    Flyway flyway = Flyway.configure()
+        .dataSource(database.dataSource())
+        .locations("filesystem:" + migrations)
+        .schemas(schemaLabel)
+        .baselineOnMigrate(true)
+        .baselineVersion("0")
+        .load();
+    ValidateResult result;
+    try {
+      result = flyway.validateWithResult();
+    } catch (RuntimeException e) {
+      throw new IllegalStateException(
+          "Не удалось сверить схему " + schemaLabel + " (" + database.name() + ") с " + migrations
+              + ". Подними MySQL и хотя раз прогони rfr-auth / rfr-api. Причина: " + e.getMessage(),
+          e
+      );
     }
+    if (result.validationSuccessful) {
+      return;
+    }
+    String details = result.invalidMigrations == null
+        ? ""
+        : result.invalidMigrations.stream()
+            .map(FlywayAlignment::describeInvalid)
+            .collect(Collectors.joining("; "));
+    throw new IllegalStateException("""
+        Flyway schema mismatch for %s (%s).
+        Checkout: %s
+        %s
+
+        Call to action:
+        1) Переключил ветку без рестарта MySQL / rfr-auth / rfr-api — код и схема разъехались.
+        2) Перезапусти бэкенды (`./gradlew runAll --parallel`), чтобы Flyway накатил миграции.
+        3) Если схема чужая — пересоздай БД (`./localenv.sh`) и снова подними auth+api.
+        """.formatted(schemaLabel, database.name(), migrations, details));
+  }
+
+  private static String describeInvalid(ValidateOutput migration) {
+    String message = migration.errorDetails == null ? "" : migration.errorDetails.errorMessage;
+    return migration.version + " " + migration.description + " — " + message;
   }
 
   private static List<String> appliedVersions(Databases database) {
@@ -116,11 +124,4 @@ public final class FlywayAlignment {
     );
   }
 
-  private static String parseVersion(String fileName) {
-    if (!fileName.regionMatches(true, 0, "V", 0, 1) || !fileName.contains("__")) {
-      return null;
-    }
-    int end = fileName.indexOf("__");
-    return fileName.substring(1, end).replace('_', '.');
-  }
 }

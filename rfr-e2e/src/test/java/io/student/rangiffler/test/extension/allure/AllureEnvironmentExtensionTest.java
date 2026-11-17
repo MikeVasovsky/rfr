@@ -61,6 +61,7 @@ class AllureEnvironmentExtensionTest {
         Map.of(
             "allure.results.directory", resultsDir.toString(),
             "rfr.schemaCheck", "false",
+            "rfr.flywayLabel", "false",
             "rfr.standCheck", "false",
             "rfr.commit", "abc1234",
             "rfr.frontUrl", "http://front.test",

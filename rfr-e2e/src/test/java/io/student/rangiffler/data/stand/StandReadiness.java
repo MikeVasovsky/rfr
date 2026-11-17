@@ -17,21 +17,17 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 /**
  * Ожидание стенда: фабрика probes из {@link TestConfig} + опрос до успеха или budget.
+ * Перед каждой попыткой таймаут запроса — минимум из 2 с и остатка {@code rfr.standTimeout}.
  * Критерии те же, что у {@code scripts/wait-for-stand.sh}.
  */
 public final class StandReadiness {
 
   private static final long POLL_SLEEP_MS = 500L;
   private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(2);
-  private static final HttpClient HTTP = HttpClient.newBuilder()
-      .version(HttpClient.Version.HTTP_1_1)
-      .connectTimeout(REQUEST_TIMEOUT)
-      .build();
 
   private StandReadiness() {
   }
@@ -49,31 +45,47 @@ public final class StandReadiness {
     while (true) {
       List<Probe> down = new ArrayList<>();
       for (Probe probe : probes) {
-        if (!probe.check.getAsBoolean()) {
+        Duration remaining = remaining(deadlineNs);
+        if (!remaining.isPositive()) {
+          down.add(probe);
+          continue;
+        }
+        Duration timeout = remaining.compareTo(REQUEST_TIMEOUT) < 0 ? remaining : REQUEST_TIMEOUT;
+        if (!probe.check.ready(timeout)) {
           down.add(probe);
         }
       }
       if (down.isEmpty()) {
         return;
       }
-      if (System.nanoTime() >= deadlineNs) {
-        String names = down.stream().map(Probe::name).collect(Collectors.joining(", "));
-        String commands = down.stream()
-            .map(probe -> probe.name() + ": " + probe.startCommand())
-            .collect(Collectors.joining("; "));
-        throw new IllegalStateException(
-            "Stand not ready within " + budget.toSeconds()
-                + "s. Still down: " + names
-                + ". Start: " + commands
-        );
+      Duration remaining = remaining(deadlineNs);
+      if (!remaining.isPositive()) {
+        throw notReady(down, budget);
       }
       try {
-        TimeUnit.MILLISECONDS.sleep(POLL_SLEEP_MS);
+        long sleepMs = Math.min(POLL_SLEEP_MS, Math.max(1L, remaining.toMillis()));
+        TimeUnit.MILLISECONDS.sleep(sleepMs);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         throw new IllegalStateException("Stand readiness wait interrupted", e);
       }
     }
+  }
+
+  private static Duration remaining(long deadlineNs) {
+    return Duration.ofNanos(deadlineNs - System.nanoTime());
+  }
+
+  private static IllegalStateException notReady(List<Probe> down, Duration budget) {
+    String names = down.stream().map(Probe::name).collect(Collectors.joining(", "));
+    String commands = down.stream()
+        .map(probe -> probe.name() + ": " + probe.startCommand())
+        .collect(Collectors.joining("; "));
+    return new IllegalStateException(
+        "Stand not ready within " + budget.toSeconds()
+            + "s. Still down: " + names
+            + ". Start: " + commands
+    );
   }
 
   private static List<Probe> probes(TestConfig config) {
@@ -96,56 +108,71 @@ public final class StandReadiness {
       case "mysql" -> new Probe(
           "MySQL",
           "docker compose up -d --wait",
-          () -> mysqlReady(config.authJdbcUrl(), config.jdbcUser(), config.jdbcPassword())
+          timeout -> mysqlReady(config.authJdbcUrl(), config.jdbcUser(), config.jdbcPassword(), timeout)
       );
       case "auth" -> new Probe(
           "rfr-auth",
           "./gradlew runAll --parallel",
-          () -> httpReady(config.authUrl() + "/", Set.of(200, 302))
+          timeout -> httpReady(config.authUrl() + "/", Set.of(200, 302), timeout)
       );
       case "api" -> new Probe(
           "rfr-api",
           "./gradlew runAll --parallel",
-          () -> httpReady(config.apiUrl() + "/graphiql", Set.of(401))
+          timeout -> httpReady(config.apiUrl() + "/graphiql", Set.of(401), timeout)
       );
       case "front" -> new Probe(
           "rfr-gql-client",
           "npm run dev",
-          () -> httpReady(config.frontUrl() + "/", Set.of(200))
+          timeout -> httpReady(config.frontUrl() + "/", Set.of(200), timeout)
       );
       default -> throw new IllegalArgumentException("Unknown stand check id: " + id);
     };
   }
 
-  private static boolean httpReady(String url, Set<Integer> okStatuses) {
+  private static boolean httpReady(String url, Set<Integer> okStatuses, Duration timeout) {
+    if (timeout == null || !timeout.isPositive()) {
+      return false;
+    }
+    HttpClient client = HttpClient.newBuilder()
+        .version(HttpClient.Version.HTTP_1_1)
+        .connectTimeout(timeout)
+        .build();
     try {
       HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-          .timeout(REQUEST_TIMEOUT)
+          .timeout(timeout)
           .GET()
           .build();
-      HttpResponse<Void> response = HTTP.send(request, HttpResponse.BodyHandlers.discarding());
+      HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
       return okStatuses.contains(response.statusCode());
     } catch (Exception ignored) {
       return false;
+    } finally {
+      client.close();
     }
   }
 
-  private static boolean mysqlReady(String jdbcUrl, String user, String password) {
+  private static boolean mysqlReady(String jdbcUrl, String user, String password, Duration timeout) {
+    if (timeout == null || !timeout.isPositive()) {
+      return false;
+    }
+    int millis = (int) Math.min(Integer.MAX_VALUE, Math.max(1L, timeout.toMillis()));
     Properties properties = new Properties();
     properties.setProperty("user", user);
     properties.setProperty("password", password);
-    properties.setProperty("connectTimeout", "2000");
-    properties.setProperty("socketTimeout", "2000");
-    String url = jdbcUrl.contains("connectTimeout=")
-        ? jdbcUrl
-        : jdbcUrl + (jdbcUrl.contains("?") ? "&" : "?") + "connectTimeout=2000&socketTimeout=2000";
-    try (Connection ignored = DriverManager.getConnection(url, properties)) {
+    properties.setProperty("connectTimeout", Integer.toString(millis));
+    properties.setProperty("socketTimeout", Integer.toString(millis));
+    try (Connection ignored = DriverManager.getConnection(jdbcUrl, properties)) {
       return true;
     } catch (SQLException ignored) {
       return false;
     }
   }
 
-  private record Probe(String name, String startCommand, BooleanSupplier check) {
+  @FunctionalInterface
+  private interface ReadyCheck {
+    boolean ready(Duration timeout);
+  }
+
+  private record Probe(String name, String startCommand, ReadyCheck check) {
   }
 }

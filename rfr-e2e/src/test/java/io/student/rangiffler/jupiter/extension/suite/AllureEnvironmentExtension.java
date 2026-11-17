@@ -15,12 +15,16 @@ import java.util.Properties;
  * Пишет {@code environment.properties} в каталог Allure-результатов в {@link #afterSuite}.
  * Регистрация — только ServiceLoader; в {@code META-INF/services} должна быть раньше guards,
  * чтобы хук успел зарегистрироваться до возможного падения их {@code beforeSuite}.
+ * Версии Flyway читаются только при {@code rfr.flywayLabel} не {@code false}
+ * (задача {@code test} — {@code skipped} без JDBC, задача {@code e2e} — из БД).
  */
 public final class AllureEnvironmentExtension implements SuiteExtension {
 
   static final String RESULTS_DIRECTORY_PROPERTY = "allure.results.directory";
   static final String DEFAULT_RESULTS_DIRECTORY = "build/allure-results";
   static final String ENVIRONMENT_FILE = "environment.properties";
+  static final String FLYWAY_LABEL_PROPERTY = "rfr.flywayLabel";
+  static final String SKIPPED_FLYWAY_LABEL = "skipped";
 
   @Override
   public void afterSuite(ExtensionContext context) {
@@ -32,8 +36,8 @@ public final class AllureEnvironmentExtension implements SuiteExtension {
     properties.setProperty("browser", config.browser());
     properties.setProperty("headless", Boolean.toString(config.headless()));
     properties.setProperty("commit", System.getProperty("rfr.commit", ""));
-    properties.setProperty("rangiffler-auth", FlywayAlignment.appliedLabel(Databases.AUTH));
-    properties.setProperty("rangiffler-api", FlywayAlignment.appliedLabel(Databases.API));
+    properties.setProperty("rangiffler-auth", flywayLabel(Databases.AUTH));
+    properties.setProperty("rangiffler-api", flywayLabel(Databases.API));
     Path directory = resultsDirectory();
     try {
       Files.createDirectories(directory);
@@ -46,6 +50,13 @@ public final class AllureEnvironmentExtension implements SuiteExtension {
           e
       );
     }
+  }
+
+  private static String flywayLabel(Databases database) {
+    if ("false".equalsIgnoreCase(System.getProperty(FLYWAY_LABEL_PROPERTY, "false"))) {
+      return SKIPPED_FLYWAY_LABEL;
+    }
+    return FlywayAlignment.appliedLabel(database);
   }
 
   static Path resultsDirectory() {

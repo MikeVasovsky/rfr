@@ -31,6 +31,8 @@ dependencies {
     testImplementation "mysql:mysql-connector-java:8.0.33"
     testImplementation "org.springframework:spring-jdbc:6.2.11"
     testImplementation "org.springframework.security:spring-security-crypto:6.5.5"
+    testImplementation "org.flywaydb:flyway-core:13.7.0"
+    testImplementation "org.flywaydb:flyway-mysql:13.7.0"
 
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "org.junit.platform:junit-platform-suite"
@@ -86,7 +88,8 @@ def configureE2eSuite = { Test task ->
     task.systemProperty 'rfr.apiUrl', System.getProperty('rfr.apiUrl', 'http://localhost:8081')
     task.systemProperty 'rfr.standTimeout', System.getProperty('rfr.standTimeout', '180')
     task.systemProperty 'rfr.standCheck', System.getProperty('rfr.standCheck', 'true')
-    task.systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'true')
+    task.systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'false')
+    task.systemProperty 'rfr.flywayLabel', System.getProperty('rfr.flywayLabel', 'false')
     task.systemProperty 'rfr.commit', System.getProperty('rfr.commit', shortCommit)
 }
 
@@ -99,6 +102,10 @@ tasks.register('e2e', Test) {
     classpath = sourceSets.test.runtimeClasspath
 }
 tasks.named('e2e', Test).configure(configureE2eSuite)
+tasks.named('e2e', Test).configure {
+    systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'true')
+    systemProperty 'rfr.flywayLabel', System.getProperty('rfr.flywayLabel', 'true')
+}
 
 tasks.register('installPlaywright', JavaExec) {
     group = 'e2e'
