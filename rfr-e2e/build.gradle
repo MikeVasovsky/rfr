@@ -88,6 +88,12 @@ def configureE2eSuite = { Test task ->
     task.systemProperty 'rfr.standCheck', System.getProperty('rfr.standCheck', 'true')
     task.systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'true')
     task.systemProperty 'rfr.commit', System.getProperty('rfr.commit', shortCommit)
+    ['rfr.viewportWidth', 'rfr.viewportHeight'].each { key ->
+        def value = System.getProperty(key)
+        if (value) {
+            task.systemProperty key, value
+        }
+    }
 }
 
 tasks.named('test', Test).configure(configureE2eSuite)
