@@ -6,7 +6,8 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import io.student.rangiffler.config.TestConfig;
-import io.student.rangiffler.jupiter.extension.UserExtension;
+import io.student.rangiffler.jupiter.extension.BrowserTimeoutExtension;
+import io.student.rangiffler.jupiter.extension.user.UserExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -16,9 +17,10 @@ import java.util.Locale;
 
 /**
  * Базовый UI-тест: поднимает и гасит Playwright-браузер и вкладку {@link Page} вокруг каждого теста.
+ * Action-timeout задаёт {@link BrowserTimeoutExtension}.
  */
-@Tag("web")
-@ExtendWith(UserExtension.class)
+@Tag("ui")
+@ExtendWith({UserExtension.class, BrowserTimeoutExtension.class})
 public abstract class BaseUiTest {
 
   private static final TestConfig CFG = TestConfig.getInstance();
@@ -28,9 +30,18 @@ public abstract class BaseUiTest {
   protected BrowserContext context;
   protected Page page;
 
+  public final Page page() {
+    return page;
+  }
+
+  public final BrowserContext context() {
+    return context;
+  }
+
   @BeforeEach
   void setUpBrowser() {
     playwright = Playwright.create();
+    playwright.selectors().setTestIdAttribute("data-test-id");
     browser = browserType().launch(
         new BrowserType.LaunchOptions()
             .setHeadless(CFG.headless())
@@ -40,7 +51,6 @@ public abstract class BaseUiTest {
             .setViewportSize(CFG.viewportWidth(), CFG.viewportHeight())
     );
     page = context.newPage();
-    page.setDefaultTimeout(CFG.defaultTimeoutMs());
   }
 
   @AfterEach

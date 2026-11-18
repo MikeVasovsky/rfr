@@ -1,0 +1,103 @@
+package io.student.rangiffler.page;
+
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.AriaRole;
+import io.qameta.allure.Step;
+import io.student.rangiffler.config.TestConfig;
+import io.student.rangiffler.page.component.PeopleTable;
+
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import static io.student.rangiffler.utils.LocatorOptions.exactRole;
+
+/**
+ * Страница People ({@code /people}): вкладки и таблица пользователей ({@link PeopleTable}).
+ */
+public final class PeoplePage {
+
+  public static final String URL = TestConfig.getInstance().frontUrl() + "/people";
+
+  private final Page page;
+  private final Locator friendsTab;
+  private final Locator incomeInvitationsTab;
+  private final Locator outcomeInvitationsTab;
+  private final PeopleTable peopleTable;
+
+  public PeoplePage(Page page) {
+    this.page = page;
+    this.friendsTab = page.getByRole(AriaRole.TAB, exactRole("Friends"));
+    this.incomeInvitationsTab = page.getByRole(AriaRole.TAB, exactRole("Income invitations"));
+    this.outcomeInvitationsTab = page.getByRole(AriaRole.TAB, exactRole("Outcome invitations"));
+    this.peopleTable = new PeopleTable(page);
+  }
+
+  public PeopleTable peopleTable() {
+    return peopleTable;
+  }
+
+  @Step("Открыть страницу People")
+  public PeoplePage open() {
+    page.navigate(URL);
+    return this;
+  }
+
+  @Step("Проверить URL: {expectedUrl}")
+  public PeoplePage checkThatUrl(String expectedUrl) {
+    assertThat(page).hasURL(expectedUrl);
+    return this;
+  }
+
+  @Step("Открыть вкладку Friends")
+  public PeoplePage clickFriendsTab() {
+    friendsTab.click();
+    return this;
+  }
+
+  @Step("Открыть вкладку Income invitations")
+  public PeoplePage clickIncomeInvitationsTab() {
+    incomeInvitationsTab.click();
+    return this;
+  }
+
+  @Step("Открыть вкладку Outcome invitations")
+  public PeoplePage clickOutcomeInvitationsTab() {
+    outcomeInvitationsTab.click();
+    return this;
+  }
+
+  @Step("Проверить, что в таблице {expectedCount} пользователей")
+  public PeoplePage checkThatUsersCount(int expectedCount) {
+    peopleTable.checkThatUsersCount(expectedCount);
+    return this;
+  }
+
+  @Step("Проверить пустой список пользователей")
+  public PeoplePage checkThatNoUsersYet() {
+    peopleTable.checkThatNoUsersYet();
+    return this;
+  }
+
+  @Step("Проверить, что пользователь {username} отсутствует в таблице")
+  public PeoplePage checkThatUserAbsent(String username) {
+    peopleTable.checkThatUserAbsent(username);
+    return this;
+  }
+
+  @Step("Проверить друга {username}: строка и кнопка Remove")
+  public PeoplePage checkThatFriend(String username) {
+    peopleTable.row(username).checkThatFriend();
+    return this;
+  }
+
+  @Step("Проверить входящее invitation {username}: строка и кнопки Accept / Decline")
+  public PeoplePage checkThatIncomeInvitation(String username) {
+    peopleTable.row(username).checkThatIncomeInvitation();
+    return this;
+  }
+
+  @Step("Проверить исходящее invitation {username}: строка, Waiting... и Cancel")
+  public PeoplePage checkThatOutcomeInvitation(String username) {
+    peopleTable.row(username).checkThatOutcomeInvitation();
+    return this;
+  }
+}

@@ -12,6 +12,7 @@ import java.util.List;
 public final class RandomDataUtils {
 
   private static final Faker FAKER = new Faker();
+  private static final String USERNAME_PREFIX = "rfr_";
 
   private static final List<String> COUNTRIES = List.of(
       "France",
@@ -25,7 +26,7 @@ public final class RandomDataUtils {
   }
 
   public static TestUser createUser() {
-    String username = FAKER.regexify("[a-zA-Z]{6,10}");
+    String username = USERNAME_PREFIX + FAKER.regexify("[a-zA-Z]{6,10}");
     String password = FAKER.internet().password(6, 10, true, false, true);
     return new TestUser(username, password);
   }

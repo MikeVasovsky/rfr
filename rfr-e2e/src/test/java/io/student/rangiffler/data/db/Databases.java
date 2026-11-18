@@ -13,7 +13,9 @@ import javax.sql.DataSource;
  */
 public enum Databases {
 
-  AUTH(TestConfig.getInstance().authJdbcUrl());
+  AUTH(TestConfig.getInstance().authJdbcUrl()),
+  API(TestConfig.getInstance().apiJdbcUrl());
+
 
   private final DataSource dataSource;
   private final JdbcClient jdbcClient;

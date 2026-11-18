@@ -1,7 +1,8 @@
 package io.student.rangiffler.test.auth;
 
 import io.qameta.allure.Allure;
-import io.student.rangiffler.jupiter.annotation.User;
+import io.student.rangiffler.jupiter.annotation.UiTest;
+import io.student.rangiffler.jupiter.annotation.user.User;
 import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.utils.RandomDataUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
  * Spring Security маскирует {@code UsernameNotFoundException} как {@code Bad credentials}
  * (в auth {@code Locale.setDefault(US)} + {@code spring.web.locale=en_US}).
  */
+@UiTest
 public class LoginNegativeTest extends AuthUiTest {
 
   private static final String BAD_CREDENTIALS = "Bad credentials";

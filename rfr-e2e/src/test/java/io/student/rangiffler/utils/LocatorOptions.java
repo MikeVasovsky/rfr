@@ -30,4 +30,9 @@ public final class LocatorOptions {
   public static Page.GetByTextOptions exactText() {
     return new Page.GetByTextOptions().setExact(true);
   }
+
+  /** Опции для {@code locator.getByText(...)} — полное совпадение текста в цепочке от родителя. */
+  public static Locator.GetByTextOptions exactLocatorText() {
+    return new Locator.GetByTextOptions().setExact(true);
+  }
 }

@@ -22,11 +22,13 @@ description: >-
 
 6. Одно бизнес-действие — один метод, имя которого называет форму: это пример необязательно называть так, называй по логике действия на странице `fillLoginForm(username, password)`, `fillRegistrationForm(...)`. Без безликих `fillForm`/`fill`/`submit` и цепочек `fillUsername().fillPassword()`; отдельный метод на поле — только если тесту нужно именно поле (валидация).
 
-7. Действие отдельно от проверки: `fill…`/`click…` ничего не проверяют; `checkThat…` только проверяют через `PlaywrightAssertions.assertThat(locator)` и ничего не кликают. Без `locator.isVisible()` в JUnit-проверках и ручных ожиданий.
+7. Действие отдельно от проверки: `fill…`/`click…` ничего не проверяют; `checkThat…` только проверяют и ничего не кликают.
+   **Assertions — только Playwright web-first:** `PlaywrightAssertions.assertThat(page|locator|apiResponse)` (`isVisible`, `hasText`, `hasURL`, …).
+   **Запрещено** любые другие проверки в UI Page Object / UI-тестах: `org.junit.jupiter.api.Assertions` / `assertEquals` / `assertTrue`, AssertJ, Hamcrest, TestNG Assert, `locator.isVisible()` / `isHidden()` / `count()` / `textContent()` + ручной assert, `waitForTimeout`, самописные poll/retry. Состояние страницы ждут только web-first assertions и auto-wait у `click`/`fill`.
 
 8. Без `checkThatOpened`, `checkPageLoaded`, `isLoaded`, `waitUntilLoaded`: `click`/`fill` ждут элемент, web-first assertions ждут состояние. URL и видимость страницы проверяем, только когда переход и есть предмет теста.
 
-9. Локаторы: `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText` / `getByTestId`. Без `first()`/`nth()`, MUI-классов и XPath; неуникальный элемент сужай родителем: `page.getByRole(AriaRole.BANNER).getByRole(…)`.
+9. Локаторы: `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText` / `getByTestId`. Без `first()`/`nth()`, MUI-классов и XPath; неуникальный элемент сужай родителем: `page.getByRole(AriaRole.BANNER).getByRole(…)`. Карточка и строка списка ищутся по роли и уникальному тексту (`getByRole` + `filter(hasText)`). Кнопки и действия — только внутри этого компонента, не от страницы.
 
 10. Поля ввода (`getByLabel`, и при необходимости `getByPlaceholder` / `getByRole` для combobox) — **только с полным совпадением** (`exact = true`). Кнопки, ссылки, текст — тоже с `exact`, если ищете по `name`/`text`.
 
@@ -38,14 +40,16 @@ description: >-
 
 14. Без комментариев к методам и полям: смысл методов передают имена и текст `@Step`. Над каждым классом — краткий Javadoc: за что отвечает класс.
 
-15. Группы тестов — через JUnit `@Tag` (не свои аннотации). UI-тесты наследуют `@Tag("web")` с `BaseUiTest`; не-UI заглушки — `@Tag("fake")`. Новый класс вне иерархии `BaseUiTest` помечай тегом явно. Запуск группы: `-DincludeTags=web` или `.\allure-report.ps1 -Tag web`. Допустимые теги и команды — в `rfr-e2e/README.md`; новый тег сначала добавь в README и в этот пункт skill.
+15. Группы тестов — через JUnit `@Tag` (или мета-аннотацию с `@Tag`). Каждый конкретный UI-`*Test` помечай `@UiTest` (`@Tag("UI")`); `BaseUiTest` поднимает браузер/timeout и даёт `@Tag("ui")` для stand/фильтра. Не-UI заглушки — `@Tag("fake")`. Запуск: `-DincludeTags=ui` / `UI` или `.\allure-report.ps1 -Tag ui`. Допустимые теги — `rfr-e2e/README.md`; новый тег сначала в README и сюда.
+
+16. Каждый `@Test` — с `@DisplayName("…")` (человекочитаемое имя сценария для отчёта). Шаги проверок в тесте обязательно именовать через `Allure.step("…", () -> …)`: не оставлять голые цепочки `checkThat…` / assert без текста шага. Имя шага говорит, *что проверяем* (как в `LoginTest` / `ProfileTest`). Методы `checkThat…` на Page Object по-прежнему с `@Step` (п. 4).
 
 ## Where code lives
 
 - Config: `rfr-e2e/.../config/TestConfig.java`
 - Pages: `rfr-e2e/.../page/`
-- Components: `rfr-e2e/.../page/component/`
+- Components: `rfr-e2e/.../page/component/` (`HeaderComponent`, `CredentialsForm`, `PeopleTable` → `PeopleRow`)
 - Locator helpers: `rfr-e2e/.../utils/LocatorOptions.java`
 - UI tests: `rfr-e2e/.../test/{auth,profile}/` (+ `BaseUiTest` in `test/`)
-- Browser lifecycle: `BaseUiTest` (`@Tag("web")`)
+- Browser lifecycle: `BaseUiTest` (`@Tag("ui")`); action-timeout — `BrowserTimeoutExtension`; маркер класса — `@UiTest`
 - Run / Allure: `rfr-e2e/README.md`, `rfr-e2e/allure-report.ps1`

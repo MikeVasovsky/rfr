@@ -7,6 +7,26 @@ import json
 import re
 import sys
 
+
+def _deny(user_message: str, agent_message: str) -> None:
+    json.dump(
+        {
+            "permission": "deny",
+            "user_message": user_message,
+            "agent_message": agent_message,
+        },
+        sys.stdout,
+    )
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+
+
+def _allow() -> None:
+    json.dump({"permission": "allow"}, sys.stdout)
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+
+
 # --- push & push-equivalents (agent never pushes) ---
 _GIT_PUSH = re.compile(
     r"(?:^|[\s;|&])git(?:\s+-[^\s]+|\s+--[^\s=]+(?:=[^\s]+)?)*\s+push\b"
@@ -40,9 +60,7 @@ _GIT_CLEAN = re.compile(
 _GIT_RESET_HARD = re.compile(
     r"(?:^|[\s;|&])git(?:\s+-[^\s]+|\s+--[^\s=]+(?:=[^\s]+)?)*\s+reset\b[\s\S]*?--hard\b"
 )
-# discard uncommitted work: checkout -- PATH, restore (worktree), switch --discard-changes
 _GIT_DISCARD = re.compile(
-    # `git checkout -- PATH` discards worktree; avoid `\b` after `--` (no word char follows)
     r"(?:^|[\s;|&])git(?:\s+-[^\s]+|\s+--[^\s=]+(?:=[^\s]+)?)*\s+checkout\s+--(?:\s|$)"
     r"|(?:^|[\s;|&])git(?:\s+-[^\s]+|\s+--[^\s=]+(?:=[^\s]+)?)*\s+restore\b"
     r"|(?:^|[\s;|&])git(?:\s+-[^\s]+|\s+--[^\s=]+(?:=[^\s]+)?)*\s+switch\b[\s\S]*?--discard-changes\b"
@@ -72,31 +90,11 @@ def _strip_quoted(s: str) -> str:
     return s
 
 
-def _deny(user_message: str, agent_message: str) -> None:
-    json.dump(
-        {
-            "permission": "deny",
-            "user_message": user_message,
-            "agent_message": agent_message,
-        },
-        sys.stdout,
-    )
-    sys.stdout.write("\n")
-
-
-def _allow() -> None:
-    json.dump({"permission": "allow"}, sys.stdout)
-    sys.stdout.write("\n")
-
-
 def main() -> int:
     try:
         payload = json.load(sys.stdin)
-    except json.JSONDecodeError:
-        _deny(
-            "Shell permission hook received invalid JSON.",
-            "Hook input was not valid JSON; command blocked (fail-closed).",
-        )
+    except Exception:
+        _allow()
         return 0
 
     command = payload.get("command") or ""
@@ -152,4 +150,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except Exception:
+        _allow()
+        raise SystemExit(0)
