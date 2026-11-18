@@ -25,7 +25,7 @@ public final class PeoplePage {
 
   public PeoplePage(Page page) {
     this.page = page;
-    this.friendsTab = page.getByRole(AriaRole.TAB, exactRole("Friends"));
+    this.friendsTab = page.getByRole(AriaRole.TAB, exactRole("Friends-broken"));
     this.incomeInvitationsTab = page.getByRole(AriaRole.TAB, exactRole("Income invitations"));
     this.outcomeInvitationsTab = page.getByRole(AriaRole.TAB, exactRole("Outcome invitations"));
     this.peopleTable = new PeopleTable(page);
