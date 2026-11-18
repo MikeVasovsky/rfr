@@ -5,7 +5,7 @@
  *   ./gradlew e2eStack
  *   .\gradlew.bat e2eStack
  *
- * MySQL → auth+api → frontend (background, left running) → installPlaywright → runE2e.
+ * MySQL → auth+api → frontend (background, left running) → installPlaywrightWithDeps → runE2e.
  */
 
 def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
@@ -69,11 +69,15 @@ tasks.register('e2eStackUp') {
     doLast {
         stackDir.mkdirs()
 
-        println 'e2eStack: docker compose up -d --wait (MySQL)'
-        List<String> composeCmd = isWindows
-                ? ['cmd', '/c', 'docker', 'compose', 'up', '-d', '--wait']
-                : ['docker', 'compose', 'up', '-d', '--wait']
-        runForeground(composeCmd, rootDir)
+        if (servicePortOpen(3306)) {
+            println 'e2eStack: MySQL:3306 already up — skip docker compose'
+        } else {
+            println 'e2eStack: docker compose up -d --wait (MySQL)'
+            List<String> composeCmd = isWindows
+                    ? ['cmd', '/c', 'docker', 'compose', 'up', '-d', '--wait']
+                    : ['docker', 'compose', 'up', '-d', '--wait']
+            runForeground(composeCmd, rootDir)
+        }
 
         if (servicePortOpen(9001) && servicePortOpen(8081)) {
             println 'e2eStack: auth:9001 and api:8081 already up — skip runAll'

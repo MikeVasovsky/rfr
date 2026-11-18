@@ -1,7 +1,7 @@
 package io.student.rangiffler.test.auth;
 
 import io.qameta.allure.Allure;
-import io.student.rangiffler.jupiter.annotation.User;
+import io.student.rangiffler.jupiter.annotation.user.User;
 import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.page.MyTravelsPage;
 import org.junit.jupiter.api.DisplayName;

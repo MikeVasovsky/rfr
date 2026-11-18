@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
+import io.student.rangiffler.utils.GraphqlResponses;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -98,15 +99,7 @@ public final class ProfilePage {
 
   @Step("Нажать Save и дождаться UpdateUser")
   public ProfilePage clickSave() {
-    page.waitForResponse(
-        response -> {
-          String postData = response.request().postData();
-          return response.url().contains("/graphql")
-              && postData != null
-              && postData.contains("UpdateUser");
-        },
-        saveButton::click
-    );
+    GraphqlResponses.waitForSuccess(page, "UpdateUser", saveButton::click);
     return this;
   }
 

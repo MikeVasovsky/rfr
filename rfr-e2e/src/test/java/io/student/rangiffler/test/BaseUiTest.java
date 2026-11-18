@@ -6,7 +6,7 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import io.student.rangiffler.config.TestConfig;
-import io.student.rangiffler.jupiter.extension.UserExtension;
+import io.student.rangiffler.jupiter.extension.user.UserExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
