@@ -34,6 +34,10 @@ public abstract class BaseUiTest {
     return page;
   }
 
+  public final BrowserContext context() {
+    return context;
+  }
+
   @BeforeEach
   void setUpBrowser() {
     playwright = Playwright.create();

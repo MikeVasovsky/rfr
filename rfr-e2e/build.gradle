@@ -106,6 +106,20 @@ tasks.register('e2e', Test) {
 }
 tasks.named('e2e', Test).configure(configureE2eSuite)
 
+tasks.register('showTrace', JavaExec) {
+    group = 'e2e'
+    description = 'Open a Playwright trace.zip in Trace Viewer. Pass -Ptrace=<path>'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.microsoft.playwright.CLI'
+    def trace = project.findProperty('trace')
+    doFirst {
+        if (trace == null || trace.toString().isBlank()) {
+            throw new GradleException('showTrace: pass -Ptrace=<path to trace.zip>')
+        }
+    }
+    args 'show-trace', (trace == null ? '' : trace.toString())
+}
+
 tasks.register('installPlaywright', JavaExec) {
     group = 'e2e'
     description = 'Install Chromium browser for Playwright'

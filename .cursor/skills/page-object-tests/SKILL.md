@@ -28,7 +28,7 @@ description: >-
 
 8. Без `checkThatOpened`, `checkPageLoaded`, `isLoaded`, `waitUntilLoaded`: `click`/`fill` ждут элемент, web-first assertions ждут состояние. URL и видимость страницы проверяем, только когда переход и есть предмет теста.
 
-9. Локаторы: `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText` / `getByTestId`. Без `first()`/`nth()`, MUI-классов и XPath; неуникальный элемент сужай родителем: `page.getByRole(AriaRole.BANNER).getByRole(…)`.
+9. Локаторы: `getByRole` / `getByLabel` / `getByPlaceholder` / `getByText` / `getByTestId`. Без `first()`/`nth()`, MUI-классов и XPath; неуникальный элемент сужай родителем: `page.getByRole(AriaRole.BANNER).getByRole(…)`. Карточка и строка списка ищутся по роли и уникальному тексту (`getByRole` + `filter(hasText)`). Кнопки и действия — только внутри этого компонента, не от страницы.
 
 10. Поля ввода (`getByLabel`, и при необходимости `getByPlaceholder` / `getByRole` для combobox) — **только с полным совпадением** (`exact = true`). Кнопки, ссылки, текст — тоже с `exact`, если ищете по `name`/`text`.
 
