@@ -68,9 +68,11 @@ public class MyTravelsMockTest extends BaseUiTest {
   void shouldFilterFeedByCountry(@User TestUser user) {
     login(user);
 
-    Allure.step("До фильтра на ленте 4 фото", () ->
+    Allure.step("До фильтра на ленте 4 фото, у Парижа виден like", () ->
         new MyTravelsPage(page)
             .checkThatPhotoCount(ONLY_MY_PHOTOS)
+            .photoCard(FILTER_DESCRIPTION)
+            .checkThatLikeVisible()
     );
 
     Allure.step("France: чип фильтра и одна карточка Париж", () ->
@@ -81,7 +83,6 @@ public class MyTravelsMockTest extends BaseUiTest {
             .checkThatPhotoCount(1)
             .photoCard(FILTER_DESCRIPTION)
             .checkThatVisible()
-            .checkThatLikeVisible()
     );
 
     Allure.step("Сброс фильтра возвращает 4 фото", () ->
