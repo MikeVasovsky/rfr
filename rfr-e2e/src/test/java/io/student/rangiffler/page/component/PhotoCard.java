@@ -6,7 +6,6 @@ import io.qameta.allure.Step;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static io.student.rangiffler.utils.LocatorOptions.exactLocatorRole;
-import static io.student.rangiffler.utils.LocatorOptions.exactRole;
 
 /**
  * Карточка фото на My Travels: описание, like и меню своих фото внутри одного {@code article}.
@@ -44,7 +43,7 @@ public final class PhotoCard {
   }
 
   private Locator likeButton() {
-    return root.page().getByRole(AriaRole.BUTTON, exactRole("like"));
+    return root.getByRole(AriaRole.BUTTON, exactLocatorRole("like"));
   }
 
   private Locator photoActionsButton() {
