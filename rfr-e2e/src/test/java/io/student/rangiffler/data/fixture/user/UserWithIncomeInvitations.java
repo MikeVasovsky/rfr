@@ -26,17 +26,22 @@ public final class UserWithIncomeInvitations implements UserFixture {
     TestUser base = delegate.user();
     ProfileFixture.ensureFor(base);
     List<ProfileFixture> inviters = new ArrayList<>();
-    for (int i = 0; i < incomeInvitations; i++) {
-      ProfileFixture inviter = ProfileFixture.createRelated();
-      Friendship.create(inviter.user(), base, Friendship.PENDING);
-      inviters.add(inviter);
-    }
     TearDown tearDown = new TearDown()
-        .with(() -> Friendships.of(base).deleteInvitations())
-        .withEach(inviters, ProfileFixture::close)
-        .with(delegate::close);
-    List<TestUser> inviterUsers = inviters.stream().map(ProfileFixture::user).toList();
-    return new UserWithIncomeInvitations(base.withIncomeInvitations(inviterUsers), tearDown);
+        .with(() -> Friendships.of(base).deleteInvitations());
+    try {
+      for (int i = 0; i < incomeInvitations; i++) {
+        ProfileFixture inviter = ProfileFixture.createRelated();
+        tearDown.with(inviter::close);
+        inviters.add(inviter);
+        Friendship.create(inviter.user(), base, Friendship.PENDING);
+      }
+      tearDown.with(delegate::close);
+      List<TestUser> inviterUsers = inviters.stream().map(ProfileFixture::user).toList();
+      return new UserWithIncomeInvitations(base.withIncomeInvitations(inviterUsers), tearDown);
+    } catch (Exception e) {
+      tearDown.with(delegate::close).close();
+      throw e;
+    }
   }
 
   @Override

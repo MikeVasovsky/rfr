@@ -26,17 +26,22 @@ public final class UserWithFriendsFixture implements UserFixture {
     TestUser base = delegate.user();
     ProfileFixture.ensureFor(base);
     List<ProfileFixture> friends = new ArrayList<>();
-    for (int i = 0; i < friendship; i++) {
-      ProfileFixture friend = ProfileFixture.createRelated();
-      Friendship.create(base, friend.user(), Friendship.ACCEPTED);
-      friends.add(friend);
-    }
     TearDown tearDown = new TearDown()
-        .with(() -> Friendships.of(base).deleteFriends())
-        .withEach(friends, ProfileFixture::close)
-        .with(delegate::close);
-    List<TestUser> friendUsers = friends.stream().map(ProfileFixture::user).toList();
-    return new UserWithFriendsFixture(base.withFriends(friendUsers), tearDown);
+        .with(() -> Friendships.of(base).deleteFriends());
+    try {
+      for (int i = 0; i < friendship; i++) {
+        ProfileFixture friend = ProfileFixture.createRelated();
+        tearDown.with(friend::close);
+        friends.add(friend);
+        Friendship.create(base, friend.user(), Friendship.ACCEPTED);
+      }
+      tearDown.with(delegate::close);
+      List<TestUser> friendUsers = friends.stream().map(ProfileFixture::user).toList();
+      return new UserWithFriendsFixture(base.withFriends(friendUsers), tearDown);
+    } catch (Exception e) {
+      tearDown.with(delegate::close).close();
+      throw e;
+    }
   }
 
   @Override
