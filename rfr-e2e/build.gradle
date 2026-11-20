@@ -31,8 +31,11 @@ dependencies {
     testImplementation "mysql:mysql-connector-java:8.0.33"
     testImplementation "org.springframework:spring-jdbc:6.2.11"
     testImplementation "org.springframework.security:spring-security-crypto:6.5.5"
+    testImplementation "org.flywaydb:flyway-core:13.7.0"
+    testImplementation "org.flywaydb:flyway-mysql:13.7.0"
 
     testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.junit.platform:junit-platform-suite"
     testImplementation "org.junit.platform:junit-platform-testkit"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
     testRuntimeOnly "org.aspectj:aspectjrt:$aspectJVersion"
@@ -45,6 +48,20 @@ allure {
         autoconfigure.set(false)
     }
 }
+
+def shortCommit = {
+    try {
+        def proc = new ProcessBuilder('git', 'rev-parse', '--short', 'HEAD')
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(true)
+            .start()
+        def text = proc.inputStream.text.trim()
+        proc.waitFor()
+        return proc.exitValue() == 0 ? text : ''
+    } catch (Exception ignored) {
+        return ''
+    }
+}()
 
 def configureE2eSuite = { Test task ->
     task.outputs.upToDateWhen { false }
@@ -68,6 +85,12 @@ def configureE2eSuite = { Test task ->
     task.jvmArgumentProviders.add({ ["-javaagent:${configurations.agent.singleFile}"] } as CommandLineArgumentProvider)
     task.systemProperty 'rfr.frontUrl', System.getProperty('rfr.frontUrl', 'http://localhost:3001')
     task.systemProperty 'rfr.authUrl', System.getProperty('rfr.authUrl', 'http://localhost:9001')
+    task.systemProperty 'rfr.apiUrl', System.getProperty('rfr.apiUrl', 'http://localhost:8081')
+    task.systemProperty 'rfr.standTimeout', System.getProperty('rfr.standTimeout', '180')
+    task.systemProperty 'rfr.standCheck', System.getProperty('rfr.standCheck', 'true')
+    task.systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'false')
+    task.systemProperty 'rfr.flywayLabel', System.getProperty('rfr.flywayLabel', 'false')
+    task.systemProperty 'rfr.commit', System.getProperty('rfr.commit', shortCommit)
 }
 
 tasks.named('test', Test).configure(configureE2eSuite)
@@ -79,6 +102,10 @@ tasks.register('e2e', Test) {
     classpath = sourceSets.test.runtimeClasspath
 }
 tasks.named('e2e', Test).configure(configureE2eSuite)
+tasks.named('e2e', Test).configure {
+    systemProperty 'rfr.schemaCheck', System.getProperty('rfr.schemaCheck', 'true')
+    systemProperty 'rfr.flywayLabel', System.getProperty('rfr.flywayLabel', 'true')
+}
 
 tasks.register('installPlaywright', JavaExec) {
     group = 'e2e'

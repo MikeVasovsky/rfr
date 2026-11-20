@@ -23,7 +23,7 @@ public final class SingleUserFixture implements UserFixture {
           Friendships.of(account.user()).delete();
           Profile.of(account.user()).delete();
         })
-        .with(account::delete);
+        .with(() -> account.delete());
   }
 
   public static UserFixture create() {

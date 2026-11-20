@@ -17,7 +17,7 @@ import java.util.Locale;
 /**
  * Базовый UI-тест: поднимает и гасит Playwright-браузер и вкладку {@link Page} вокруг каждого теста.
  */
-@Tag("web")
+@Tag("ui")
 @ExtendWith(UserExtension.class)
 public abstract class BaseUiTest {
 

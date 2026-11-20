@@ -32,7 +32,7 @@ public final class ProfileFixture implements AutoCloseable {
     TestUser user = RandomDataUtils.createUser();
     TestProfile profile = RandomDataUtils.createProfile();
     Profile handle = Profile.create(user, profile);
-    return new ProfileFixture(handle, new TearDown().with(handle::delete));
+    return new ProfileFixture(handle, new TearDown().with(() -> handle.delete()));
   }
 
   public TestUser user() {

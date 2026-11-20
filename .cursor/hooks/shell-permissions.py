@@ -95,7 +95,7 @@ def main() -> int:
         payload = json.load(sys.stdin)
     except Exception:
         _deny(
-            "Shell permission hook received invalid JSON.",
+            "Shell permission hook received invalid input.",
             "Hook input was not valid JSON; command blocked (fail-closed).",
         )
         return 0

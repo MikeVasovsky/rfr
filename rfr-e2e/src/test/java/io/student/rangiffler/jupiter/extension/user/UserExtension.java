@@ -50,7 +50,7 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
   @Override
   public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
     return Optional.ofNullable(store(extensionContext).get(FIXTURE_KEY, UserFixture.class))
-        .map(UserFixture::user)
+        .map(userFixture -> userFixture.user())
         .orElseThrow(() -> new ParameterResolutionException(
             "Пользователь не создан в BeforeEachCallback для параметра @User TestUser"
         ));
