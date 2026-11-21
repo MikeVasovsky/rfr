@@ -9,7 +9,7 @@ description: >-
 
 **Уникальность данных.** Username с префиксом `rfr_` + рандом (`RandomDataUtils`); не переиспользовать фиксированные логины между тестами (кроме пула `@StaticUser`).
 
-**Владелец — дерево декораторов.** Ресурсы (auth/api-строки, партнёры, Friendship) принадлежат дереву `UserFixture` из `data/fixture/user/UserRequest.fixture()`; Store держит только корень и закрывает его. Каждый декоратор владеет своим origin и partners и чистит их в `TearDown` (`data/fixture`).
+**Владелец — дерево декораторов.** Ресурсы (auth/api-строки, партнёры, Friendship) принадлежат дереву `UserFixture` из `data/fixture/user/UserRequest.fixture()`; Store держит только корень и закрывает его. Каждый декоратор владеет своим origin и partners и чистит их в `TearDown` (`data/fixture`). Все `AutoCloseable`-фикстуры — только в `data/fixture` (+ подпакеты); в тест через `ParameterResolver` уходит только `record` (например `TestUser`). **Явная передача fixture в тест запрещена.**
 
 **Новое предусловие — новый декоратор** в `data/fixture/user/`, композиция в `UserRequest.fixture()`, без флагов в базовой фикстуре и без веток в `extension/user/UserExtension`.
 

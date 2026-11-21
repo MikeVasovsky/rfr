@@ -23,8 +23,12 @@ description: >-
 6. Одно бизнес-действие — один метод, имя которого называет форму: это пример необязательно называть так, называй по логике действия на странице `fillLoginForm(username, password)`, `fillRegistrationForm(...)`. Без безликих `fillForm`/`fill`/`submit` и цепочек `fillUsername().fillPassword()`; отдельный метод на поле — только если тесту нужно именно поле (валидация).
 
 7. Действие отдельно от проверки: `fill…`/`click…` ничего не проверяют; `checkThat…` только проверяют и ничего не кликают.
-   **Assertions — только Playwright web-first:** `PlaywrightAssertions.assertThat(page|locator|apiResponse)` (`isVisible`, `hasText`, `hasURL`, …).
+   **Assertions — только Playwright web-first:** `PlaywrightAssertions.assertThat(page|locator)` (`isVisible`, `hasText`, `hasURL`, …). Не использовать `assertThat(apiResponse)` в PO/UI-тестах как замену UI-проверки.
    **Запрещено** любые другие проверки в UI Page Object / UI-тестах: `org.junit.jupiter.api.Assertions` / `assertEquals` / `assertTrue`, AssertJ, Hamcrest, TestNG Assert, `locator.isVisible()` / `isHidden()` / `count()` / `textContent()` + ручной assert, `waitForTimeout`, самописные poll/retry. Состояние страницы ждут только web-first assertions и auto-wait у `click`/`fill`.
+
+7a. **PO только UI — без транспорта и бэка.** Page Object и `page/component` ничего не знают про HTTP/GraphQL/REST, URL API, тело запроса, `operationName`, статусы ответа и сеть.
+   **Запрещено** в PO: `page.waitForResponse` / `waitForRequest`, `page.route` / `unroute`, разбор `response.request().postData()`, фильтры по `/graphql` и именам операций (`UpdateUser` и т.п.), прямые API-вызовы, ожидание бэка вместо UI.
+   Синхронизацию после действия дают UI-сигналы: snackbar, текст ошибки, значение поля, disabled/enabled, появление/исчезновение элемента — через web-first assertions / auto-wait.
 
 8. Без `checkThatOpened`, `checkPageLoaded`, `isLoaded`, `waitUntilLoaded`: `click`/`fill` ждут элемент, web-first assertions ждут состояние. URL и видимость страницы проверяем, только когда переход и есть предмет теста.
 

@@ -34,7 +34,7 @@ public class ProfileNegativeTest extends BaseUiTest {
         new ProfilePage(page)
             .open()
             .fillFirstName("a".repeat(51))
-            .clickSaveWithoutWaitingForUpdate()
+            .clickSave()
             .checkThatFirstNameError(FIRST_NAME_TOO_LONG_ERROR)
     );
   }
@@ -48,7 +48,7 @@ public class ProfileNegativeTest extends BaseUiTest {
         new ProfilePage(page)
             .open()
             .fillSurname("b".repeat(101))
-            .clickSaveWithoutWaitingForUpdate()
+            .clickSave()
             .checkThatSurnameError(SURNAME_TOO_LONG_ERROR)
     );
   }

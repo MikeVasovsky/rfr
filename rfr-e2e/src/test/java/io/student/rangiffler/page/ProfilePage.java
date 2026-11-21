@@ -96,23 +96,15 @@ public final class ProfilePage {
     return this;
   }
 
-  @Step("Нажать Save и дождаться UpdateUser")
+  @Step("Нажать Save")
   public ProfilePage clickSave() {
-    page.waitForResponse(
-        response -> {
-          String postData = response.request().postData();
-          return response.url().contains("/graphql")
-              && postData != null
-              && postData.contains("UpdateUser");
-        },
-        saveButton::click
-    );
+    saveButton.click();
     return this;
   }
 
-  @Step("Нажать Save без ожидания UpdateUser")
-  public ProfilePage clickSaveWithoutWaitingForUpdate() {
-    saveButton.click();
+  @Step("Проверить snackbar успешного обновления профиля")
+  public ProfilePage checkThatProfileUpdated() {
+    assertThat(page.getByText("Your profile is successfully updated", exactText())).isVisible();
     return this;
   }
 

@@ -12,6 +12,12 @@ description: >-
 
 **Владелец — дерево декораторов.** В Store лежит только корень UserFixture из UserRequest.fixture(), Store закрывает его как AutoCloseable; каждый декоратор владеет своим origin и partners. Поля extension'а, статика и ThreadLocal ресурсом не владеют.
 
+**AutoCloseable-фикстуры — только в `data/fixture`.** Любая фикстура тестовых данных, которая реализует `AutoCloseable` (закрывается через Store / `close()`), живёт в пакете `data/fixture` (и подпакетах `user` / `pool` / …). Ошибка ревью: `AutoCloseable`-фикстура в `jupiter/`, `test/`, `model/`, `data/db` и т.п.
+
+**ParameterResolver отдаёт только `record`.** В параметр тестового метода extension через `ParameterResolver` передаёт снимок данных — Java `record` (как `TestUser`), а не саму `AutoCloseable`-фикстуру и не mutable-класс владения. Фикстура остаётся в Store; в тест уходит только record. Ошибка ревью: `resolveParameter` возвращает `UserFixture` / `StaticUserFixture` / иной non-record; параметр теста типизирован фикстурой вместо record.
+
+**Явная передача fixture в тест запрещена.** Тест не получает и не держит `UserFixture` / декораторы / иные `AutoCloseable`-фикстуры: ни параметром метода (`@User UserFixture …`, `@StaticUser StaticUserFixture …`), ни через `ParameterResolver`, ни полем/локальной переменной из Store/extension. Владение и `close()` — только у дерева фикстур в Store; тест видит только record-снимок. Ошибка ревью: любой путь, где fixture «торчит» в тестовый метод или тестовый класс как аргумент/поле API.
+
 **Слот пула — ресурс; очередь им не владеет.** Взятый из `UsersQueue` пользователь принадлежит `StaticUserFixture` в Store (`put` до `acquire`/`create`, `close` возвращает только взятого). Статическая очередь хранит свободные слоты и ресурсом не владеет; `reset`/seed — только в тестах extension’а, не в UI-сценариях. Проба: после упавшего `@StaticUser`-теста размер пула восстановлен (`UsersQueueExtensionTest`).
 
 **Регистрация до частичной подготовки.** put в Store до create(); create() не атомарен (Account, Profile, партнёры, Friendship), поэтому close() обязан работать после падения на любом шаге.
@@ -25,6 +31,8 @@ description: >-
 **Браузерными ресурсами владеет @UsePlaywright.** Page и BrowserContext не создаются и не закрываются в тестах и extension'ах.
 
 **Слои.** В jupiter нет SQL и локаторов; в data нет JUnit, SQL только в data/db, db не зависит от data; в test нет локаторов и SQL.
+
+**PO без транспорта и бэка.** В `page/` и `page/component` запрещены `waitForResponse` / `waitForRequest`, `route`/`unroute`, разбор `postData`, фильтры по `/graphql` и GraphQL-операциям, любые ожидания/проверки сети вместо UI. Page Object работает только с UI; синхронизация — snackbar, поля, ошибки, видимость элементов (web-first). Ошибка ревью: транспорт или знание бэка в PO (как `waitForResponse` + `UpdateUser`).
 
 **Декларативная регистрация class-level extension.** Extension с областью класса (`BeforeAll`/`AfterAll` и всё, что должно жить на классном контексте) через `@ExtendWith` / meta-annotation с `@ExtendWith` вешается **только** на сам тестовый класс (`TYPE`) или на **статическое** поле класса. Любое другое место объявления такого extension — **ошибка** ревью: instance-поле, метод, параметр метода/конструктора/lifecycle, meta на этих элементах. Пример ошибки: `@Test void t(@ExtendWith(ClassScopedExtension.class) …)` или `@ExtendWith(ClassScopedExtension.class)` на методе. Method/parameter-level `@ExtendWith` допустим **только** если extension по смыслу method/parameter-scoped (не class-level).
 

@@ -15,6 +15,8 @@ readonly: true
 - Не правь файлы и не применяй patch'и к рабочей копии.
 - Из Shell только: `git diff`, `git log`, `git show`, `git apply --check` и `./gradlew :rfr-e2e:test --tests …` (на Windows — `.\gradlew.bat :rfr-e2e:test --tests …`).
 - `Page` и `BrowserContext` остаются за `@UsePlaywright`; не предлагай переносить их владение в фикстуры/`UserExtension`.
+- Фикстуры, реализующие `AutoCloseable`, — только в `data/fixture` (+ подпакеты); через `ParameterResolver` в тест — только Java `record` (например `TestUser`). **Явная передача fixture в тест запрещена** (параметр/`resolveParameter`/поле) — иначе **ошибка** по skill.
+- Page Object без транспорта/бэка: в `page/` запрещены `waitForResponse`/`waitForRequest`/`route`, GraphQL/`postData`/operationName; синхронизация только через UI — иначе **ошибка** по skill.
 - Class-level `@ExtendWith` (и meta с `@ExtendWith`) — только на классе или **static** поле; любое другое место (instance-field, метод, параметр) — **ошибка** по skill.
 - Extension должен быть безопасен для любого метода suite (класс / глобальная регистрация): без предусловия — no-op, без предположений «вызвали → ресурс нужен»; см. skill.
 - Программная регистрация (`@RegisterExtension` и аналоги) — только если нужен конструктор/builder; иначе `@ExtendWith` / meta / `junit-platform.properties` (в т.ч. autodetection ServiceLoader); см. skill.

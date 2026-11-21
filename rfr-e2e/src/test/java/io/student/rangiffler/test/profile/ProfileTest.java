@@ -36,6 +36,7 @@ public class ProfileTest extends BaseUiTest {
             .open()
             .fillFirstName(FIRST_NAME)
             .clickSave()
+            .checkThatProfileUpdated()
             .reload()
             .checkThatProfile(FIRST_NAME, "", DEFAULT_LOCATION)
     );
@@ -51,6 +52,7 @@ public class ProfileTest extends BaseUiTest {
             .open()
             .fillSurname(SURNAME)
             .clickSave()
+            .checkThatProfileUpdated()
             .reload()
             .checkThatProfile("", SURNAME, DEFAULT_LOCATION)
     );
@@ -66,6 +68,7 @@ public class ProfileTest extends BaseUiTest {
             .open()
             .selectLocation(COUNTRY_CANADA)
             .clickSave()
+            .checkThatProfileUpdated()
             .reload()
             .checkThatProfile("", "", COUNTRY_CANADA)
     );
@@ -81,6 +84,7 @@ public class ProfileTest extends BaseUiTest {
             .open()
             .uploadAvatar()
             .clickSave()
+            .checkThatProfileUpdated()
             .reload()
             .checkThatAvatarIsSaved()
     );
@@ -98,6 +102,7 @@ public class ProfileTest extends BaseUiTest {
             .fillSurname(SURNAME)
             .selectLocation(COUNTRY_CANADA)
             .clickSave()
+            .checkThatProfileUpdated()
             .reload()
             .checkThatProfile(FIRST_NAME, SURNAME, COUNTRY_CANADA)
     );
@@ -122,6 +127,7 @@ public class ProfileTest extends BaseUiTest {
             .open()
             .selectLocation(COUNTRY_CANADA)
             .clickSave()
+            .checkThatProfileUpdated()
             .reload()
             .checkThatProfile("", "", COUNTRY_CANADA)
     );
@@ -130,6 +136,7 @@ public class ProfileTest extends BaseUiTest {
         new ProfilePage(page)
             .selectLocation(COUNTRY_FRANCE)
             .clickSave()
+            .checkThatProfileUpdated()
             .reload()
             .checkThatProfile("", "", COUNTRY_FRANCE)
     );
