@@ -31,4 +31,6 @@ Elegant Objects / «только interface + final + без getter» **не на
 
 ## Прочее из global — оставляем
 
-Communication, Files (`.bak`), RTK, CLI «если есть в PATH», узкий scope — действуют, если не противоречат пунктам выше.
+Communication, Files (`.bak`), CLI «если есть в PATH», узкий scope — действуют, если не противоречат пунктам выше.
+
+**RTK** — только глобально (`~/.cursor/hooks.json`), не в project hooks. См. `.cursor/rules/06-rtk-global.mdc`.

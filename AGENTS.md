@@ -21,6 +21,8 @@
    - `rfr-e2e` `*.java` → `:rfr-e2e:compileTestJava`
    - `rfr-gql-client` `*.ts`/`*.tsx` → `npx tsc --noEmit`, затем `npx eslint <rel-path>` из `rfr-gql-client` (flat config; путь относительно этой папки; флаги как в CI)
    - Hook: `.cursor/hooks/compile-on-edit.py` (`postToolUse`)
+7. **RTK — только глобально.** Хук в `~/.cursor/hooks.json` (`rtk hook cursor`); в project `.cursor/hooks.json` RTK не дублировать.
+   - Cursor rule: `.cursor/rules/06-rtk-global.mdc` (`alwaysApply: true`)
 
 ## Structure
 

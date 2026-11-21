@@ -1,0 +1,29 @@
+---
+description: RTK (Rust Token Killer) подключён только глобально — без project-хука в репо.
+alwaysApply: true
+---
+
+# RTK — только глобально
+
+RTK установлен у пользователя и инициализирован **глобально** для Cursor:
+
+- бинарь: `~/.local/bin/rtk` (должен быть в `PATH`)
+- хук: `~/.cursor/hooks.json` → `rtk hook cursor` на matcher `Shell`
+- init: `rtk init --global --agent cursor`
+
+## Обязательно
+
+1. Считай RTK **уже подключённым** на уровне пользователя. Не предлагай и не делай `rtk init` в проекте без явной просьбы.
+2. **Не** добавляй `rtk hook cursor` (и любой RTK-хук) в project `.cursor/hooks.json` — там только хуки репозитория (`shell-permissions`, `compile-on-edit`, …).
+3. Shell-команды пиши как обычно (`git status`, `./gradlew …`). Глобальный `preToolUse` сам перепишет поддерживаемые команды в `rtk …`. Явный префикс `rtk` — только если пользователь попросил или hook недоступен.
+4. Не коммить и не тащи в PR конфиги/артефакты RTK (`~/.cursor/hooks.json`, `RTK.md`, локальный `.rtk/`), если пользователь явно не попросил.
+
+## Запрещено
+
+- Дублировать RTK-хук в `.cursor/hooks.json` репозитория «на всякий случай»
+- Ставить project-local `rtk init` / `.rtk/` как замену глобальной установке
+- Ломать или удалять глобальный хук RTK при правках project hooks
+
+## Если RTK «не видно»
+
+Проверь `which rtk` / `rtk --version` и наличие записи в `~/.cursor/hooks.json`. Не чини это через project hooks — чини глобальную установку (`rtk init --global --agent cursor`).
