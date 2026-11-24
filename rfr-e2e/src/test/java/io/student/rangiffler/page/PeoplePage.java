@@ -46,9 +46,19 @@ public final class PeoplePage {
     return peopleTable;
   }
 
+  public PeopleTable table() {
+    return peopleTable;
+  }
+
   @Step("Открыть страницу People")
   public PeoplePage open() {
     page.navigate(URL);
+    return this;
+  }
+
+  @Step("Открыть вкладку {tab}")
+  public PeoplePage openTab(PeopleTab tab) {
+    page.getByRole(AriaRole.TAB, exactRole(tab.title())).click();
     return this;
   }
 

@@ -34,6 +34,10 @@ public abstract class BaseUiTest {
     return page;
   }
 
+  public final Browser browser() {
+    return browser;
+  }
+
   public final BrowserContext context() {
     return context;
   }

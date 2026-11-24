@@ -1,0 +1,19 @@
+package io.student.rangiffler.jupiter.annotation;
+
+import io.student.rangiffler.jupiter.extension.SessionExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Второй {@code BrowserContext} в UI-тесте: {@code GuestSession} без {@code @User}
+ * или {@code UserSession} с {@code @User} (вход через UI в fixture).
+ */
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+@ExtendWith(SessionExtension.class)
+public @interface Session {
+}

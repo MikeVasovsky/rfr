@@ -44,6 +44,13 @@ public final class LandingPage {
     return this;
   }
 
+  @Step("Проверить, что гостю доступны вход и регистрация")
+  public LandingPage checkThatLoginAvailable() {
+    assertThat(loginButton).isVisible();
+    assertThat(registerLink).isVisible();
+    return this;
+  }
+
   @Step("Нажать Register")
   public RegisterPage clickRegister() {
     registerLink.click();

@@ -1,8 +1,8 @@
 package io.student.rangiffler.jupiter.extension.user;
 
 import io.qameta.allure.Allure;
-import io.student.rangiffler.data.fixture.user.UserRequest;
 import io.student.rangiffler.data.fixture.UserFixture;
+import io.student.rangiffler.data.fixture.user.UserRequest;
 import io.student.rangiffler.jupiter.annotation.user.User;
 import io.student.rangiffler.model.TestUser;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -13,30 +13,26 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.lang.reflect.Parameter;
-import java.util.Optional;
 
 /**
- * Жизненный цикл тестового пользователя в auth БД:
- * {@link BeforeEachCallback} создаёт {@link UserFixture},
- * {@link ParameterResolver} передаёт {@code @User TestUser},
- * {@link AfterEachCallback} закрывает fixture.
+ * Жизненный цикл тестовых пользователей: создаёт фикстуру на каждый параметр с {@link User},
+ * отдаёт {@code @User TestUser} и делится пользователем с другими extension через {@link #user}.
  */
 public final class UserExtension implements BeforeEachCallback, ParameterResolver, AfterEachCallback {
 
   private static final ExtensionContext.Namespace NAMESPACE =
       ExtensionContext.Namespace.create(UserExtension.class);
-  private static final String FIXTURE_KEY = "userFixture";
 
   @Override
   public void beforeEach(ExtensionContext context) {
     Parameter[] parameters = context.getRequiredTestMethod().getParameters();
-    for (Parameter p : parameters) {
-      User u = p.getAnnotation(User.class);
-      if (u != null && TestUser.class.isAssignableFrom(p.getType())) {
-        Allure.step("Создать пользователя в auth БД", () ->
-            store(context).put(FIXTURE_KEY, UserRequest.from(u).fixture())
+    for (int index = 0; index < parameters.length; index++) {
+      User user = parameters[index].getAnnotation(User.class);
+      if (user != null) {
+        int parameterIndex = index;
+        Allure.step("Создать пользователя в auth БД [param=" + parameterIndex + "]", () ->
+            store(context).put(key(parameterIndex), UserRequest.from(user).fixture())
         );
-        break;
       }
     }
   }
@@ -44,22 +40,49 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
   @Override
   public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
     return parameterContext.isAnnotated(User.class)
-        && TestUser.class.isAssignableFrom(parameterContext.getParameter().getType());
+        && TestUser.class.isAssignableFrom(parameterContext.getParameter().getType())
+        && extensionContext.getTestMethod()
+        .filter(parameterContext.getDeclaringExecutable()::equals)
+        .isPresent();
   }
 
   @Override
   public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-    return Optional.ofNullable(store(extensionContext).get(FIXTURE_KEY, UserFixture.class))
-        .map(userFixture -> userFixture.user())
-        .orElseThrow(() -> new ParameterResolutionException(
-            "Пользователь не создан в BeforeEachCallback для параметра @User TestUser"
-        ));
+    return user(extensionContext, parameterContext.getIndex());
+  }
+
+  /**
+   * Пользователь, созданный для параметра с индексом {@code parameterIndex}
+   * (в т.ч. для {@code @Session @User UserSession}).
+   */
+  public static TestUser user(ExtensionContext context, int parameterIndex) {
+    UserFixture fixture = store(context).get(key(parameterIndex), UserFixture.class);
+    if (fixture == null) {
+      throw new ParameterResolutionException(
+          "No user was created for parameter " + parameterIndex
+              + " of " + context.getRequiredTestMethod()
+      );
+    }
+    return fixture.user();
   }
 
   @Override
   public void afterEach(ExtensionContext context) {
-    Optional.ofNullable(store(context).remove(FIXTURE_KEY, UserFixture.class))
-        .ifPresent(fixture -> Allure.step("Удалить пользователя из auth БД", fixture::close));
+    Parameter[] parameters = context.getRequiredTestMethod().getParameters();
+    for (int index = 0; index < parameters.length; index++) {
+      if (parameters[index].getAnnotation(User.class) == null) {
+        continue;
+      }
+      UserFixture fixture = store(context).remove(key(index), UserFixture.class);
+      if (fixture != null) {
+        int parameterIndex = index;
+        Allure.step("Удалить пользователя из auth БД [param=" + parameterIndex + "]", fixture::close);
+      }
+    }
+  }
+
+  private static String key(int index) {
+    return "user-" + index;
   }
 
   private static ExtensionContext.Store store(ExtensionContext context) {

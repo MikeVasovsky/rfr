@@ -2,6 +2,7 @@ import {
     Avatar,
     Box,
     Card,
+    CircularProgress,
     Divider,
     Stack,
     Table,
@@ -57,6 +58,7 @@ const headCells: readonly HeadCell[] = [
 
 interface PeopleTableInterface {
     data: User[];
+    loading: boolean;
     page: number;
     hasPreviousPage: boolean;
     hasNextPage: boolean;
@@ -76,6 +78,7 @@ const fullName = (user: User) => [user.firstname, user.surname].filter(Boolean).
 
 export const PeopleTable: FC<PeopleTableInterface> = ({
                                                           data,
+                                                          loading,
                                                           page,
                                                           hasPreviousPage,
                                                           hasNextPage,
@@ -90,9 +93,9 @@ export const PeopleTable: FC<PeopleTableInterface> = ({
         <Card>
             <TableToolbar setSearch={setSearch} onSearchSubmit={onSearchSubmit}/>
             {data?.length > 0 && (compact ? (
-                <Stack divider={<Divider/>} sx={{borderTop: 1, borderColor: "divider"}}>
+                <Stack role="list" aria-label="People" divider={<Divider aria-hidden/>} sx={{borderTop: 1, borderColor: "divider"}}>
                     {data.map((row: User) => (
-                        <Box key={row.id} data-test-id="people-row" sx={{display: "flex", alignItems: "center", gap: 2, px: 2, py: 1.5, flexWrap: "wrap"}}>
+                        <Box key={row.id} role="listitem" data-test-id="people-row" sx={{display: "flex", alignItems: "center", gap: 2, px: 2, py: 1.5, flexWrap: "wrap"}}>
                             <Avatar src={row.avatar} sx={{width: 44, height: 44}}/>
                             <Box sx={{flex: 1, minWidth: 140}}>
                                 <Typography sx={{fontWeight: 600}}>{row.username}</Typography>
@@ -109,15 +112,15 @@ export const PeopleTable: FC<PeopleTableInterface> = ({
                 </Stack>
             ) : (
                 <TableContainer>
-                    <Table aria-labelledby="tableTitle">
+                    <Table aria-label="People">
                         <TableHead headCells={headCells}/>
                         <TableBody>
                             {data.map((row: User) => (
-                                    <TableRow key={row.id} data-test-id="people-row" hover tabIndex={-1}>
-                                        <TableCell component="th" scope="row" sx={{py: 1}}>
+                                    <TableRow key={row.id} hover tabIndex={-1} data-test-id="people-row">
+                                        <TableCell sx={{py: 1}}>
                                             <Avatar src={row.avatar}/>
                                         </TableCell>
-                                        <TableCell sx={{fontWeight: 600}}>{row.username}</TableCell>
+                                        <TableCell component="th" scope="row" sx={{fontWeight: 600}}>{row.username}</TableCell>
                                         <TableCell>{row.firstname ?? "---"}</TableCell>
                                         <TableCell>{row.surname ?? "---"}</TableCell>
                                         <TableCell><Location user={row}/></TableCell>
@@ -130,7 +133,12 @@ export const PeopleTable: FC<PeopleTableInterface> = ({
                     </Table>
                 </TableContainer>
             ))}
-            {!data?.length && (
+            {loading && !data?.length && (
+                <Box sx={{textAlign: "center", py: 10, px: 3, borderTop: 1, borderColor: "divider"}}>
+                    <CircularProgress aria-label="Loading users"/>
+                </Box>
+            )}
+            {!loading && !data?.length && (
                 <Box sx={{textAlign: "center", py: 10, px: 3, borderTop: 1, borderColor: "divider"}}>
                     <PeopleOutlineOutlinedIcon sx={{fontSize: 72, color: "primary.main", opacity: 0.6}}/>
                     <Typography variant="h6" component="p" sx={{mt: 2}}>

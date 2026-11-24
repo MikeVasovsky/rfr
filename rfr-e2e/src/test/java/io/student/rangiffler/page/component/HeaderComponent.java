@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
+import io.student.rangiffler.page.LandingPage;
 import io.student.rangiffler.page.ProfilePage;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
@@ -29,6 +30,12 @@ public final class HeaderComponent {
   public ProfilePage clickProfile() {
     profileButton.click();
     return new ProfilePage(page);
+  }
+
+  @Step("Нажать Logout")
+  public LandingPage clickLogout() {
+    logoutButton.click();
+    return new LandingPage(page);
   }
 
   @Step("Проверить видимость кнопки Logout")
