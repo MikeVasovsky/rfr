@@ -14,6 +14,7 @@
 ## Неочевидное
 
 - Page Objects — skill `page-object-tests` (`.cursor/skills/page-object-tests/SKILL.md`).
+- `domain/` — enum UI-текстов: `Notification` (snackbar), `PeopleAction` (кнопки строки People). Проверка уведомлений — только через `page/component/Snackbar` (страницы делегируют `checkThatNotification` / `checkThatProfileUpdated`).
 - Вход только через UI; токены в `localStorage` не подставлять.
 - Проход через Playwright MCP ≠ зелёный тест; успех — JUnit через Gradle (`README.md`, `allure-report.ps1`).
 - Данные `@User TestUser`: `annotation/user` → `extension/user` → `data/fixture/user` (`UserRequest`, `SingleUserFixture`, декораторы), без широких `DELETE`/`TRUNCATE`.

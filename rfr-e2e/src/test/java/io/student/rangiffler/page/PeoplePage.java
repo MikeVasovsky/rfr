@@ -5,7 +5,9 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
+import io.student.rangiffler.domain.Notification;
 import io.student.rangiffler.page.component.PeopleTable;
+import io.student.rangiffler.page.component.Snackbar;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static io.student.rangiffler.utils.LocatorOptions.exactLabel;
@@ -26,6 +28,7 @@ public final class PeoplePage {
   private final Locator searchPeopleInput;
   private final Locator searchPeopleButton;
   private final PeopleTable peopleTable;
+  private final Snackbar snackbar;
 
   public PeoplePage(Page page) {
     this.page = page;
@@ -36,6 +39,7 @@ public final class PeoplePage {
     this.searchPeopleInput = page.getByLabel("search people", exactLabel());
     this.searchPeopleButton = page.getByRole(AriaRole.BUTTON, exactRole("search"));
     this.peopleTable = new PeopleTable(page);
+    this.snackbar = new Snackbar(page);
   }
 
   public PeopleTable peopleTable() {
@@ -51,6 +55,12 @@ public final class PeoplePage {
   @Step("Проверить URL: {expectedUrl}")
   public PeoplePage checkThatUrl(String expectedUrl) {
     assertThat(page).hasURL(expectedUrl);
+    return this;
+  }
+
+  @Step("Проверить уведомление на странице People: {notification}")
+  public PeoplePage checkThatNotification(Notification notification) {
+    snackbar.checkThatShown(notification);
     return this;
   }
 

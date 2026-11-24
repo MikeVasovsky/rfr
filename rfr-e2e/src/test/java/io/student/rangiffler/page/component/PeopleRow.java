@@ -3,6 +3,7 @@ package io.student.rangiffler.page.component;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
+import io.student.rangiffler.domain.PeopleAction;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static io.student.rangiffler.utils.LocatorOptions.exactLocatorRole;
@@ -28,15 +29,15 @@ public final class PeopleRow {
   @Step("Проверить друга: кнопка Remove")
   public PeopleRow checkThatFriend() {
     assertThat(root).isVisible();
-    assertThat(root.getByRole(AriaRole.BUTTON, exactLocatorRole("Remove"))).isVisible();
+    assertThat(button(PeopleAction.REMOVE)).isVisible();
     return this;
   }
 
   @Step("Проверить входящее invitation: Accept и Decline")
   public PeopleRow checkThatIncomeInvitation() {
     assertThat(root).isVisible();
-    assertThat(root.getByRole(AriaRole.BUTTON, exactLocatorRole("Accept"))).isVisible();
-    assertThat(root.getByRole(AriaRole.BUTTON, exactLocatorRole("Decline"))).isVisible();
+    assertThat(button(PeopleAction.ACCEPT)).isVisible();
+    assertThat(button(PeopleAction.DECLINE)).isVisible();
     return this;
   }
 
@@ -44,37 +45,41 @@ public final class PeopleRow {
   public PeopleRow checkThatOutcomeInvitation() {
     assertThat(root).isVisible();
     assertThat(root.getByText("Waiting...", exactLocatorText())).isVisible();
-    assertThat(root.getByRole(AriaRole.BUTTON, exactLocatorRole("Cancel"))).isVisible();
+    assertThat(button(PeopleAction.CANCEL)).isVisible();
     return this;
   }
 
   @Step("Нажать Remove")
   public PeopleRow clickRemove() {
-    root.getByRole(AriaRole.BUTTON, exactLocatorRole("Remove")).click();
+    button(PeopleAction.REMOVE).click();
     return this;
   }
 
   @Step("Нажать Accept")
   public PeopleRow clickAccept() {
-    root.getByRole(AriaRole.BUTTON, exactLocatorRole("Accept")).click();
+    button(PeopleAction.ACCEPT).click();
     return this;
   }
 
   @Step("Нажать Decline")
   public PeopleRow clickDecline() {
-    root.getByRole(AriaRole.BUTTON, exactLocatorRole("Decline")).click();
+    button(PeopleAction.DECLINE).click();
     return this;
   }
 
   @Step("Нажать Cancel")
   public PeopleRow clickCancel() {
-    root.getByRole(AriaRole.BUTTON, exactLocatorRole("Cancel")).click();
+    button(PeopleAction.CANCEL).click();
     return this;
   }
 
   @Step("Нажать Add")
   public PeopleRow clickAdd() {
-    root.getByRole(AriaRole.BUTTON, exactLocatorRole("Add")).click();
+    button(PeopleAction.ADD).click();
     return this;
+  }
+
+  private Locator button(PeopleAction action) {
+    return root.getByRole(AriaRole.BUTTON, exactLocatorRole(action.title()));
   }
 }

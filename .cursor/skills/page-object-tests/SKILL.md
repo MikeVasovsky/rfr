@@ -44,16 +44,19 @@ description: >-
 
 14. Без комментариев к методам и полям: смысл методов передают имена и текст `@Step`. Над каждым классом — краткий Javadoc: за что отвечает класс.
 
-15. Группы тестов — через JUnit `@Tag` (или мета-аннотацию с `@Tag`). Каждый конкретный UI-`*Test` помечай `@UiTest` (`@Tag("UI")`); `BaseUiTest` поднимает браузер/timeout и даёт `@Tag("ui")` для stand/фильтра. Не-UI заглушки — `@Tag("fake")`. Запуск: `-DincludeTags=ui` / `UI` или `.\allure-report.ps1 -Tag ui`. Допустимые теги — `rfr-e2e/README.md`; новый тег сначала в README и сюда.
+15. Тексты уведомлений — только `domain.Notification`; проверка — только через `page/component/Snackbar` (`checkThatShown`), страница делегирует (`checkThatNotification`, `checkThatProfileUpdated`). Подписи кнопок строки People — `domain.PeopleAction` (не строковые литералы в PO/тестах). Новый текст UI — новое значение enum. Локальный текст состояния одного компонента (`Waiting...` в `PeopleRow`) может остаться строкой в одном локаторе.
 
-16. Каждый `@Test` — с `@DisplayName("…")` (человекочитаемое имя сценария для отчёта). Шаги проверок в тесте обязательно именовать через `Allure.step("…", () -> …)`: не оставлять голые цепочки `checkThat…` / assert без текста шага. Имя шага говорит, *что проверяем* (как в `LoginTest` / `ProfileTest`). Методы `checkThat…` на Page Object по-прежнему с `@Step` (п. 4).
+16. Группы тестов — через JUnit `@Tag` (или мета-аннотацию с `@Tag`). Каждый конкретный UI-`*Test` помечай `@UiTest` (`@Tag("UI")`); `BaseUiTest` поднимает браузер/timeout и даёт `@Tag("ui")` для stand/фильтра. Не-UI заглушки — `@Tag("fake")`. Запуск: `-DincludeTags=ui` / `UI` или `.\allure-report.ps1 -Tag ui`. Допустимые теги — `rfr-e2e/README.md`; новый тег сначала в README и сюда.
+
+17. Каждый `@Test` — с `@DisplayName("…")` (человекочитаемое имя сценария для отчёта). Шаги проверок в тесте обязательно именовать через `Allure.step("…", () -> …)`: не оставлять голые цепочки `checkThat…` / assert без текста шага. Имя шага говорит, *что проверяем* (как в `LoginTest` / `ProfileTest`). Методы `checkThat…` на Page Object по-прежнему с `@Step` (п. 4).
 
 ## Where code lives
 
 - Config: `rfr-e2e/.../config/TestConfig.java`
+- Domain enums: `rfr-e2e/.../domain/` (`Notification`, `PeopleAction`)
 - Pages: `rfr-e2e/.../page/`
-- Components: `rfr-e2e/.../page/component/` (`HeaderComponent`, `CredentialsForm`, `PeopleTable` → `PeopleRow`)
+- Components: `rfr-e2e/.../page/component/` (`HeaderComponent`, `CredentialsForm`, `Snackbar`, `PeopleTable` → `PeopleRow`)
 - Locator helpers: `rfr-e2e/.../utils/LocatorOptions.java`
-- UI tests: `rfr-e2e/.../test/{auth,profile}/` (+ `BaseUiTest` in `test/`)
-- Browser lifecycle: `BaseUiTest` (`@Tag("ui")`); action-timeout — `BrowserTimeoutExtension`; маркер класса — `@UiTest`
+- UI tests: `rfr-e2e/.../test/{auth,profile,session}/` (+ `BaseUiTest` in `test/`)
+- Browser lifecycle: `BaseUiTest` (`@Tag("ui")`); dual — `@MultiSessionUiTest` + `SessionExtension`; action-timeout — `BrowserTimeoutExtension`; маркер класса — `@UiTest`
 - Run / Allure: `rfr-e2e/README.md`, `rfr-e2e/allure-report.ps1`

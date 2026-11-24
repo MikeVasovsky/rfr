@@ -5,6 +5,8 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import io.student.rangiffler.config.TestConfig;
+import io.student.rangiffler.domain.Notification;
+import io.student.rangiffler.page.component.Snackbar;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -34,6 +36,7 @@ public final class ProfilePage {
   private final Locator saveButton;
   private final Locator resetButton;
   private final Locator avatarImage;
+  private final Snackbar snackbar;
 
   public ProfilePage(Page page) {
     this.page = page;
@@ -45,6 +48,7 @@ public final class ProfilePage {
     this.saveButton = page.getByRole(AriaRole.BUTTON, exactRole("Save"));
     this.resetButton = page.getByRole(AriaRole.BUTTON, exactRole("Reset"));
     this.avatarImage = page.getByRole(AriaRole.MAIN).locator("img[src^='data:im']:not([alt])");
+    this.snackbar = new Snackbar(page);
   }
 
   @Step("Открыть страницу профиля")
@@ -104,7 +108,7 @@ public final class ProfilePage {
 
   @Step("Проверить snackbar успешного обновления профиля")
   public ProfilePage checkThatProfileUpdated() {
-    assertThat(page.getByText("Your profile is successfully updated", exactText())).isVisible();
+    snackbar.checkThatShown(Notification.PROFILE_UPDATED);
     return this;
   }
 

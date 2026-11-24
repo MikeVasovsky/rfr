@@ -1,6 +1,7 @@
 package io.student.rangiffler.test.session;
 
 import io.qameta.allure.Allure;
+import io.student.rangiffler.domain.Notification;
 import io.student.rangiffler.jupiter.annotation.MultiSessionUiTest;
 import io.student.rangiffler.jupiter.annotation.session.Session;
 import io.student.rangiffler.model.UserSession;
@@ -24,7 +25,9 @@ final class DualFriendshipAtomicTest {
 
     Allure.step("Предусловие: оба логинятся", () -> loginBoth(alice, bob));
 
-    Allure.step("Alice отправляет заявку Bob", () -> sendInvitation(alice, bobUsername));
+    Allure.step("Alice отправляет заявку Bob и ждёт уведомление", () ->
+        sendInvitation(alice, bobUsername)
+    );
 
     Allure.step("У Alice Bob в Outcome invitations", () ->
         alice.peoplePage()
@@ -59,6 +62,7 @@ final class DualFriendshipAtomicTest {
             .open()
             .clickIncomeInvitationsTab()
             .clickAcceptUser(aliceUsername)
+            .checkThatNotification(Notification.INVITATION_ACCEPTED)
     );
 
     Allure.step("У Bob Alice в Friends", () ->
@@ -94,6 +98,7 @@ final class DualFriendshipAtomicTest {
             .open()
             .clickIncomeInvitationsTab()
             .clickDeclineUser(aliceUsername)
+            .checkThatNotification(Notification.INVITATION_DECLINED)
     );
 
     Allure.step("У Bob нет Alice во входящих", () ->
@@ -128,6 +133,7 @@ final class DualFriendshipAtomicTest {
         alice.peoplePage()
             .clickOutcomeInvitationsTab()
             .clickCancelOutcome(bobUsername)
+            .checkThatNotification(Notification.INVITATION_CANCELLED)
     );
 
     Allure.step("У Alice нет Bob в исходящих", () ->
@@ -163,6 +169,7 @@ final class DualFriendshipAtomicTest {
             .open()
             .clickFriendsTab()
             .clickRemoveFriend(bobUsername)
+            .checkThatNotification(Notification.FRIEND_DELETED)
             .checkThatUserAbsent(bobUsername)
     );
 
@@ -193,6 +200,7 @@ final class DualFriendshipAtomicTest {
             .open()
             .clickFriendsTab()
             .clickRemoveFriend(aliceUsername)
+            .checkThatNotification(Notification.FRIEND_DELETED)
             .checkThatUserAbsent(aliceUsername)
     );
 
@@ -214,7 +222,8 @@ final class DualFriendshipAtomicTest {
         .open()
         .clickAllPeopleTab()
         .searchPeople(toUsername)
-        .clickAddUser(toUsername);
+        .clickAddUser(toUsername)
+        .checkThatNotification(Notification.INVITATION_SENT);
   }
 
   private static void becomeFriends(
@@ -227,6 +236,7 @@ final class DualFriendshipAtomicTest {
     addressee.peoplePage()
         .open()
         .clickIncomeInvitationsTab()
-        .clickAcceptUser(requesterUsername);
+        .clickAcceptUser(requesterUsername)
+        .checkThatNotification(Notification.INVITATION_ACCEPTED);
   }
 }
