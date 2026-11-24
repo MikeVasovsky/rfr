@@ -1,6 +1,7 @@
 package io.student.rangiffler.data.fixture.user;
 
 import io.student.rangiffler.data.fixture.UserFixture;
+import io.student.rangiffler.jupiter.annotation.session.Session;
 import io.student.rangiffler.jupiter.annotation.user.User;
 
 public record UserRequest(int friends, int incomeInvitations, int outcomeInvitations) {
@@ -18,8 +19,16 @@ public record UserRequest(int friends, int incomeInvitations, int outcomeInvitat
     this(user.friends(), user.incomeInvitations(), user.outcomeInvitations());
   }
 
+  public UserRequest(Session session) {
+    this(session.friends(), session.incomeInvitations(), session.outcomeInvitations());
+  }
+
   public static UserRequest from(User user) {
     return new UserRequest(user);
+  }
+
+  public static UserRequest from(Session session) {
+    return new UserRequest(session);
   }
 
   public UserFixture fixture() {

@@ -8,6 +8,7 @@ import io.student.rangiffler.config.TestConfig;
 import io.student.rangiffler.page.component.PeopleTable;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import static io.student.rangiffler.utils.LocatorOptions.exactLabel;
 import static io.student.rangiffler.utils.LocatorOptions.exactRole;
 
 /**
@@ -19,15 +20,21 @@ public final class PeoplePage {
 
   private final Page page;
   private final Locator friendsTab;
+  private final Locator allPeopleTab;
   private final Locator incomeInvitationsTab;
   private final Locator outcomeInvitationsTab;
+  private final Locator searchPeopleInput;
+  private final Locator searchPeopleButton;
   private final PeopleTable peopleTable;
 
   public PeoplePage(Page page) {
     this.page = page;
     this.friendsTab = page.getByRole(AriaRole.TAB, exactRole("Friends"));
+    this.allPeopleTab = page.getByRole(AriaRole.TAB, exactRole("All People"));
     this.incomeInvitationsTab = page.getByRole(AriaRole.TAB, exactRole("Income invitations"));
     this.outcomeInvitationsTab = page.getByRole(AriaRole.TAB, exactRole("Outcome invitations"));
+    this.searchPeopleInput = page.getByLabel("search people", exactLabel());
+    this.searchPeopleButton = page.getByRole(AriaRole.BUTTON, exactRole("search"));
     this.peopleTable = new PeopleTable(page);
   }
 
@@ -53,6 +60,12 @@ public final class PeoplePage {
     return this;
   }
 
+  @Step("Открыть вкладку All People")
+  public PeoplePage clickAllPeopleTab() {
+    allPeopleTab.click();
+    return this;
+  }
+
   @Step("Открыть вкладку Income invitations")
   public PeoplePage clickIncomeInvitationsTab() {
     incomeInvitationsTab.click();
@@ -62,6 +75,31 @@ public final class PeoplePage {
   @Step("Открыть вкладку Outcome invitations")
   public PeoplePage clickOutcomeInvitationsTab() {
     outcomeInvitationsTab.click();
+    return this;
+  }
+
+  @Step("Найти людей по запросу: {query}")
+  public PeoplePage searchPeople(String query) {
+    searchPeopleInput.fill(query);
+    searchPeopleButton.click();
+    return this;
+  }
+
+  @Step("Отправить заявку в друзья пользователю {username}")
+  public PeoplePage clickAddUser(String username) {
+    peopleTable.row(username).clickAdd();
+    return this;
+  }
+
+  @Step("Принять заявку от пользователя {username}")
+  public PeoplePage clickAcceptUser(String username) {
+    peopleTable.row(username).clickAccept();
+    return this;
+  }
+
+  @Step("Удалить из друзей пользователя {username}")
+  public PeoplePage clickRemoveFriend(String username) {
+    peopleTable.row(username).clickRemove();
     return this;
   }
 
