@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Помечает параметр {@link io.student.rangiffler.model.UserSession}.
  * {@code guest = false} — пользователь создаётся в БД ({@code UserSessionFixture}).
  * {@code guest = true} — только credentials + BrowserContext ({@code GuestSessionFixture}), без create в БД.
- * UI-login — в тесте через {@link io.student.rangiffler.model.UserSession#login()}.
+ * UI login / register — в теле теста через Page Objects ({@code UserSession.landingPage()} …).
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)

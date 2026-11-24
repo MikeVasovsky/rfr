@@ -25,9 +25,9 @@ final class DualGuestsInviteUserTest {
     String guestTwoUsername = guestTwo.user().orElseThrow().username();
 
     Allure.step("Host логинится, гости регистрируются и логинятся", () -> {
-      host.login().checkThatUserIsAuthorized();
-      guestOne.registerAndLogin().checkThatUserIsAuthorized();
-      guestTwo.registerAndLogin().checkThatUserIsAuthorized();
+      SessionUi.login(host);
+      SessionUi.registerAndLogin(guestOne);
+      SessionUi.registerAndLogin(guestTwo);
     });
 
     Allure.step("Гости отправляют заявки host", () -> {

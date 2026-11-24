@@ -23,8 +23,8 @@ final class DualFriendshipInvitationTest {
     String bobUsername = bob.user().orElseThrow().username();
 
     Allure.step("Alice и Bob авторизуются", () -> {
-      alice.login().checkThatUserIsAuthorized();
-      bob.login().checkThatUserIsAuthorized();
+      SessionUi.login(alice);
+      SessionUi.login(bob);
     });
 
     Allure.step("Alice отправляет заявку Bob через All People", () ->
