@@ -97,6 +97,18 @@ public final class PeoplePage {
     return this;
   }
 
+  @Step("Отклонить заявку от пользователя {username}")
+  public PeoplePage clickDeclineUser(String username) {
+    peopleTable.row(username).clickDecline();
+    return this;
+  }
+
+  @Step("Отменить исходящую заявку пользователю {username}")
+  public PeoplePage clickCancelOutcome(String username) {
+    peopleTable.row(username).clickCancel();
+    return this;
+  }
+
   @Step("Удалить из друзей пользователя {username}")
   public PeoplePage clickRemoveFriend(String username) {
     peopleTable.row(username).clickRemove();
