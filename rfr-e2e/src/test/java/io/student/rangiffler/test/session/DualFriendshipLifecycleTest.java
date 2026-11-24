@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * Dual UI: принятие заявки (дружба) и удаление дружбы между двумя сессиями.
+ * Dual UI: принятие заявки (дружба) и удаление дружбы между двумя пользователями из БД.
  */
 @MultiSessionUiTest
 final class DualFriendshipLifecycleTest {
