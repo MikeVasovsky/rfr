@@ -17,6 +17,7 @@ import java.lang.reflect.Parameter;
 /**
  * Жизненный цикл тестовых пользователей: создаёт фикстуру на каждый параметр с {@link User},
  * отдаёт {@code @User TestUser} и делится пользователем с другими extension через {@link #user}.
+ * Фикстура кладётся в Store до {@link UserFixture#create()}, чтобы {@code close()} сработал при падении подготовки.
  */
 public final class UserExtension implements BeforeEachCallback, ParameterResolver, AfterEachCallback {
 
@@ -30,9 +31,11 @@ public final class UserExtension implements BeforeEachCallback, ParameterResolve
       User user = parameters[index].getAnnotation(User.class);
       if (user != null) {
         int parameterIndex = index;
-        Allure.step("Создать пользователя в auth БД [param=" + parameterIndex + "]", () ->
-            store(context).put(key(parameterIndex), UserRequest.from(user).fixture())
-        );
+        Allure.step("Создать пользователя в auth БД [param=" + parameterIndex + "]", () -> {
+          UserFixture fixture = UserRequest.from(user).fixture();
+          store(context).put(key(parameterIndex), fixture);
+          fixture.create();
+        });
       }
     }
   }

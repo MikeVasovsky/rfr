@@ -14,38 +14,56 @@ import java.util.List;
  */
 public final class UserWithIncomeInvitations implements UserFixture {
 
-  private final TestUser user;
-  private final TearDown tearDown;
+  private final UserFixture origin;
+  private final int count;
+  private TestUser user;
+  private TearDown tearDown;
 
-  private UserWithIncomeInvitations(TestUser user, TearDown tearDown) {
-    this.user = user;
-    this.tearDown = tearDown;
+  private UserWithIncomeInvitations(UserFixture origin, int count) {
+    this.origin = origin;
+    this.count = count;
   }
 
-  public static UserFixture wrap(UserFixture delegate, int incomeInvitations) {
-    TestUser base = delegate.user();
-    ProfileFixture.ensureFor(base);
+  public static UserFixture wrap(UserFixture origin, int count) {
+    return new UserWithIncomeInvitations(origin, count);
+  }
+
+  @Override
+  public void create() {
+    origin.create();
+    TestUser base = origin.user();
     List<ProfileFixture> inviters = new ArrayList<>();
-    for (int i = 0; i < incomeInvitations; i++) {
-      ProfileFixture inviter = ProfileFixture.createRelated();
-      Friendship.create(inviter.user(), base, Friendship.PENDING);
-      inviters.add(inviter);
-    }
-    TearDown tearDown = new TearDown()
+    tearDown = new TearDown()
         .with(() -> Friendships.of(base).deleteInvitations())
-        .withEach(inviters, ProfileFixture::close)
-        .with(delegate::close);
-    List<TestUser> inviterUsers = inviters.stream().map(ProfileFixture::user).toList();
-    return new UserWithIncomeInvitations(base.withIncomeInvitations(inviterUsers), tearDown);
+        .with(() -> {
+          for (int i = inviters.size() - 1; i >= 0; i--) {
+            inviters.get(i).close();
+          }
+        })
+        .with(origin::close);
+    ProfileFixture.ensureFor(base);
+    for (int i = 0; i < count; i++) {
+      ProfileFixture inviter = ProfileFixture.createRelated();
+      inviters.add(inviter);
+      Friendship.create(inviter.user(), base, Friendship.PENDING);
+    }
+    user = base.withIncomeInvitations(inviters.stream().map(ProfileFixture::user).toList());
   }
 
   @Override
   public TestUser user() {
+    if (user == null) {
+      throw new IllegalStateException("UserWithIncomeInvitations.create() has not been called");
+    }
     return user;
   }
 
   @Override
   public void close() {
-    tearDown.close();
+    if (tearDown != null) {
+      tearDown.close();
+    } else {
+      origin.close();
+    }
   }
 }

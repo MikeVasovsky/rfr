@@ -3,6 +3,9 @@ package io.student.rangiffler.data.fixture.user;
 import io.student.rangiffler.data.fixture.UserFixture;
 import io.student.rangiffler.jupiter.annotation.user.User;
 
+/**
+ * Собирает дерево {@link UserFixture} без записи в БД; данные появляются только в {@link UserFixture#create()}.
+ */
 public record UserRequest(int friends, int incomeInvitations, int outcomeInvitations) {
 
   public UserRequest {
@@ -23,7 +26,7 @@ public record UserRequest(int friends, int incomeInvitations, int outcomeInvitat
   }
 
   public UserFixture fixture() {
-    UserFixture fixture = SingleUserFixture.create();
+    UserFixture fixture = new SingleUserFixture();
     if (friends > 0) {
       fixture = UserWithFriendsFixture.wrap(fixture, friends);
     }

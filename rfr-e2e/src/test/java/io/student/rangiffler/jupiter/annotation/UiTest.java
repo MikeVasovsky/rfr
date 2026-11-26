@@ -11,8 +11,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Мета-аннотация UI-теста: тег {@code UI} и трассировка упавших тестов.
- * Браузер — {@link io.student.rangiffler.test.BaseUiTest}; action-timeout — {@code BrowserTimeoutExtension}.
+ * Мета-аннотация UI-теста: тег {@code UI} и трассировка упавших тестов ({@link BrowserTraceExtension}).
+ * Браузер — {@link io.student.rangiffler.jupiter.extension.BrowserLifecycleExtension} на {@code BaseUiTest};
+ * action-timeout — {@code BrowserTimeoutExtension}.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

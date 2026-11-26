@@ -6,21 +6,20 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import io.student.rangiffler.config.TestConfig;
+import io.student.rangiffler.jupiter.extension.BrowserLifecycleExtension;
 import io.student.rangiffler.jupiter.extension.BrowserTimeoutExtension;
 import io.student.rangiffler.jupiter.extension.user.UserExtension;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Locale;
 
 /**
- * Базовый UI-тест: поднимает и гасит Playwright-браузер и вкладку {@link Page} вокруг каждого теста.
- * Action-timeout задаёт {@link BrowserTimeoutExtension}.
+ * Базовый UI-тест: поля браузера и вкладки {@link Page}.
+ * Lifecycle — {@link BrowserLifecycleExtension}; action-timeout — {@link BrowserTimeoutExtension}.
  */
 @Tag("ui")
-@ExtendWith({UserExtension.class, BrowserTimeoutExtension.class})
+@ExtendWith({UserExtension.class, BrowserLifecycleExtension.class, BrowserTimeoutExtension.class})
 public abstract class BaseUiTest {
 
   private static final TestConfig CFG = TestConfig.getInstance();
@@ -42,8 +41,7 @@ public abstract class BaseUiTest {
     return context;
   }
 
-  @BeforeEach
-  void setUpBrowser() {
+  public final void startBrowser() {
     playwright = Playwright.create();
     playwright.selectors().setTestIdAttribute("data-test-id");
     browser = browserType().launch(
@@ -57,16 +55,19 @@ public abstract class BaseUiTest {
     page = context.newPage();
   }
 
-  @AfterEach
-  void tearDownBrowser() {
+  public final void stopBrowser() {
     if (context != null) {
       context.close();
+      context = null;
+      page = null;
     }
     if (browser != null) {
       browser.close();
+      browser = null;
     }
     if (playwright != null) {
       playwright.close();
+      playwright = null;
     }
   }
 

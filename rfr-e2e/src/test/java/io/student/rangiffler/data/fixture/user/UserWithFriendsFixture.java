@@ -14,38 +14,56 @@ import java.util.List;
  */
 public final class UserWithFriendsFixture implements UserFixture {
 
-  private final TestUser user;
-  private final TearDown tearDown;
+  private final UserFixture origin;
+  private final int count;
+  private TestUser user;
+  private TearDown tearDown;
 
-  private UserWithFriendsFixture(TestUser user, TearDown tearDown) {
-    this.user = user;
-    this.tearDown = tearDown;
+  private UserWithFriendsFixture(UserFixture origin, int count) {
+    this.origin = origin;
+    this.count = count;
   }
 
-  public static UserFixture wrap(UserFixture delegate, int friendship) {
-    TestUser base = delegate.user();
-    ProfileFixture.ensureFor(base);
+  public static UserFixture wrap(UserFixture origin, int count) {
+    return new UserWithFriendsFixture(origin, count);
+  }
+
+  @Override
+  public void create() {
+    origin.create();
+    TestUser base = origin.user();
     List<ProfileFixture> friends = new ArrayList<>();
-    for (int i = 0; i < friendship; i++) {
-      ProfileFixture friend = ProfileFixture.createRelated();
-      Friendship.create(base, friend.user(), Friendship.ACCEPTED);
-      friends.add(friend);
-    }
-    TearDown tearDown = new TearDown()
+    tearDown = new TearDown()
         .with(() -> Friendships.of(base).deleteFriends())
-        .withEach(friends, ProfileFixture::close)
-        .with(delegate::close);
-    List<TestUser> friendUsers = friends.stream().map(ProfileFixture::user).toList();
-    return new UserWithFriendsFixture(base.withFriends(friendUsers), tearDown);
+        .with(() -> {
+          for (int i = friends.size() - 1; i >= 0; i--) {
+            friends.get(i).close();
+          }
+        })
+        .with(origin::close);
+    ProfileFixture.ensureFor(base);
+    for (int i = 0; i < count; i++) {
+      ProfileFixture friend = ProfileFixture.createRelated();
+      friends.add(friend);
+      Friendship.create(base, friend.user(), Friendship.ACCEPTED);
+    }
+    user = base.withFriends(friends.stream().map(ProfileFixture::user).toList());
   }
 
   @Override
   public TestUser user() {
+    if (user == null) {
+      throw new IllegalStateException("UserWithFriendsFixture.create() has not been called");
+    }
     return user;
   }
 
   @Override
   public void close() {
-    tearDown.close();
+    if (tearDown != null) {
+      tearDown.close();
+    } else {
+      origin.close();
+    }
   }
 }

@@ -58,5 +58,5 @@ description: >-
 - Components: `rfr-e2e/.../page/component/` (`HeaderComponent`, `CredentialsForm`, `Snackbar`, `PeopleTable` → `PeopleRow`)
 - Locator helpers: `rfr-e2e/.../utils/LocatorOptions.java`
 - UI tests: `rfr-e2e/.../test/{auth,profile,session}/` (+ `BaseUiTest` in `test/`)
-- Browser lifecycle: `BaseUiTest` (`@Tag("ui")`); dual — `@MultiSessionUiTest` + `SessionExtension`; action-timeout — `BrowserTimeoutExtension`; маркер класса — `@UiTest`
+- Browser lifecycle: `BrowserLifecycleExtension` + `BaseUiTest` (`@Tag("ui")`); dual — `@Session` + `SessionExtension`; action-timeout — `BrowserTimeoutExtension`; trace — `BrowserTraceExtension` через `@UiTest`
 - Run / Allure: `rfr-e2e/README.md`, `rfr-e2e/allure-report.ps1`

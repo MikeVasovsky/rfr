@@ -4,7 +4,8 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import io.student.rangiffler.config.TestConfig;
 import io.student.rangiffler.test.BaseUiTest;
-import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -14,13 +15,14 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  * {@link #apply(BrowserContext)} — для основного и session-контекстов.
  * Также резолвит параметр {@link Page} из {@link BaseUiTest}.
  */
-public final class BrowserTimeoutExtension implements BeforeTestExecutionCallback, ParameterResolver {
+@Order(300)
+public final class BrowserTimeoutExtension implements BeforeEachCallback, ParameterResolver {
 
   private static final TestConfig CFG = TestConfig.getInstance();
 
   @Override
-  public void beforeTestExecution(ExtensionContext context) {
-    Object instance = context.getRequiredTestInstance();
+  public void beforeEach(ExtensionContext context) {
+    Object instance = context.getTestInstance().orElse(null);
     if (!(instance instanceof BaseUiTest uiTest)) {
       return;
     }

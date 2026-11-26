@@ -1,10 +1,10 @@
 package io.student.rangiffler.data.fixture.user;
 
-import io.student.rangiffler.data.fixture.UserFixture;
-import io.student.rangiffler.data.fixture.TearDown;
 import io.student.rangiffler.data.db.AuthAccount;
 import io.student.rangiffler.data.db.Friendships;
 import io.student.rangiffler.data.db.Profile;
+import io.student.rangiffler.data.fixture.TearDown;
+import io.student.rangiffler.data.fixture.UserFixture;
 import io.student.rangiffler.model.TestUser;
 import io.student.rangiffler.utils.RandomDataUtils;
 
@@ -13,12 +13,16 @@ import io.student.rangiffler.utils.RandomDataUtils;
  */
 public final class SingleUserFixture implements UserFixture {
 
-  private final AuthAccount account;
-  private final TearDown tearDown;
+  private AuthAccount account;
+  private TearDown tearDown;
 
-  private SingleUserFixture(AuthAccount account) {
-    this.account = account;
-    this.tearDown = new TearDown()
+  @Override
+  public void create() {
+    if (account != null) {
+      return;
+    }
+    account = AuthAccount.create(RandomDataUtils.createUser());
+    tearDown = new TearDown()
         .with(() -> {
           Friendships.of(account.user()).delete();
           Profile.of(account.user()).delete();
@@ -26,16 +30,18 @@ public final class SingleUserFixture implements UserFixture {
         .with(() -> account.delete());
   }
 
-  public static UserFixture create() {
-    return new SingleUserFixture(AuthAccount.create(RandomDataUtils.createUser()));
-  }
-
+  @Override
   public TestUser user() {
+    if (account == null) {
+      throw new IllegalStateException("SingleUserFixture.create() has not been called");
+    }
     return account.user();
   }
 
   @Override
   public void close() {
-    tearDown.close();
+    if (tearDown != null) {
+      tearDown.close();
+    }
   }
 }
