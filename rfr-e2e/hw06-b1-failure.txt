@@ -1,0 +1,15 @@
+org.opentest4j.MultipleFailuresError: Multiple Failures (2 failures)
+	org.opentest4j.AssertionFailedError: Locator expected to have count
+Expected: 1
+Received: 0
+
+Call log:
+  - Assert "hasCount" getByTestId("people-row") with timeout 5000ms
+  - waiting for getByTestId("people-row")
+    14 × locator resolved to 0 elements
+       - unexpected value "0"
+	org.opentest4j.AssertionFailedError: Locator expected to be visible
+Error: element(s) not found
+Call log:
+  - Assert "isVisible" getByTestId("people-row").filter(new Locator.FilterOptions().setHas(getByText("rfr_LeDiCsljIx", new Page.GetByTextOptions().setExact(true)))) with timeout 5000ms
+  - waiting for getByTestId("people-row").filter(new Locator.FilterOptions().setHas(getByText("rfr_LeDiCsljIx", new Page.GetByTextOptions().setExact(true))))
