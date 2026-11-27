@@ -18,15 +18,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Пишет Playwright trace контекста UI-теста: screenshots, snapshots и sources.
- * Старт в {@link BeforeEachCallback} после {@link BrowserLifecycleExtension};
- * {@code trace.zip} сохраняется и прикладывается к Allure только если тест упал.
+ * Пишет Playwright trace: screenshots, snapshots и sources.
+ * {@link #start}/{@link #stop} — для основного и session-контекстов;
+ * zip в Allure только у упавшего теста.
  */
 @Order(400)
 public final class BrowserTraceExtension implements BeforeEachCallback, AfterTestExecutionCallback {
 
-  private static final String RESULTS_DIRECTORY_PROPERTY = "allure.results.directory";
-  private static final String DEFAULT_RESULTS_DIRECTORY = "build/allure-results";
   private static final ExtensionContext.Namespace NAMESPACE =
       ExtensionContext.Namespace.create(BrowserTraceExtension.class);
 
@@ -43,15 +41,12 @@ public final class BrowserTraceExtension implements BeforeEachCallback, AfterTes
               + "BrowserLifecycleExtension must run first"
       );
     }
-    browserContext.tracing().start(new Tracing.StartOptions()
-        .setScreenshots(true)
-        .setSnapshots(true)
-        .setSources(true));
+    start(browserContext.tracing());
     context.getStore(NAMESPACE).put(context.getUniqueId(), Boolean.TRUE);
   }
 
   @Override
-  public void afterTestExecution(ExtensionContext context) {
+  public void afterTestExecution(ExtensionContext context) throws IOException {
     if (context.getStore(NAMESPACE).get(context.getUniqueId()) == null) {
       return;
     }
@@ -59,48 +54,42 @@ public final class BrowserTraceExtension implements BeforeEachCallback, AfterTes
     if (browserContext == null) {
       return;
     }
+    stop(browserContext.tracing(), "trace.zip", context);
+  }
+
+  /**
+   * Старт трассировки любого {@link BrowserContext} (основной или session).
+   */
+  public static void start(Tracing tracing) {
+    tracing.start(new Tracing.StartOptions()
+        .setScreenshots(true)
+        .setSnapshots(true)
+        .setSources(true));
+  }
+
+  /**
+   * Стоп трассировки: у упавшего теста — temp zip в Allure под {@code attachment}, файл удаляется;
+   * у зелёного — {@code tracing.stop()} без файла.
+   */
+  public static void stop(Tracing tracing, String attachment, ExtensionContext context) throws IOException {
     if (context.getExecutionException().isEmpty()) {
-      browserContext.tracing().stop();
+      tracing.stop();
       return;
     }
-    Path trace = tracePath(context);
-    browserContext.tracing().stop(new Tracing.StopOptions().setPath(trace));
-    attach(trace);
-  }
-
-  private static void attach(Path trace) {
-    try (InputStream input = Files.newInputStream(trace)) {
-      Allure.attachment(
-          "trace.zip",
-          "application/zip",
-          input,
-          AttachmentOptions.withFileExtension(".zip")
-      );
-    } catch (IOException e) {
-      throw new UncheckedIOException("Failed to attach Playwright trace " + trace.toAbsolutePath(), e);
-    }
-  }
-
-  private static Path tracePath(ExtensionContext context) {
-    String fileName = context.getRequiredTestClass().getSimpleName()
-        + "-"
-        + context.getRequiredTestMethod().getName()
-        + "-trace.zip";
-    Path directory = resultsDirectory();
+    Path trace = Files.createTempFile("playwright-trace-", ".zip");
     try {
-      Files.createDirectories(directory);
-    } catch (IOException e) {
-      throw new UncheckedIOException("Failed to create Allure results directory " + directory.toAbsolutePath(), e);
+      tracing.stop(new Tracing.StopOptions().setPath(trace));
+      try (InputStream input = Files.newInputStream(trace)) {
+        Allure.attachment(
+            attachment,
+            "application/zip",
+            input,
+            AttachmentOptions.withFileExtension(".zip")
+        );
+      }
+    } finally {
+      Files.deleteIfExists(trace);
     }
-    return directory.resolve(fileName);
-  }
-
-  private static Path resultsDirectory() {
-    String configured = System.getProperty(RESULTS_DIRECTORY_PROPERTY);
-    if (configured != null && !configured.isBlank()) {
-      return Path.of(configured);
-    }
-    return Path.of(DEFAULT_RESULTS_DIRECTORY);
   }
 
   private static BrowserContext browserContext(ExtensionContext context) {
@@ -111,4 +100,3 @@ public final class BrowserTraceExtension implements BeforeEachCallback, AfterTes
     return uiTest.context();
   }
 }
-

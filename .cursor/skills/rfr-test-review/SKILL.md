@@ -28,7 +28,7 @@ description: >-
 
 **Один @User — один параметр TestUser и один ключ Store с индексом параметра.** Связанные пользователи — внутри TestUser и дерева фикстур, не отдельными параметрами.
 
-**Браузерными ресурсами владеет @UsePlaywright.** Page и BrowserContext не создаются и не закрываются в тестах и extension'ах.
+**Браузерными ресурсами владеет BaseUiTest / SessionExtension.** Основной Page/BrowserContext — `BrowserLifecycleExtension` на `BaseUiTest`; второй контекст — `SessionExtension` + `SessionFixture` в Store (не создавать `newContext` в тестах). Трассировка сессии: стартует `SessionExtension` сразу после создания контекста и до UI-login; `Tracing` в Store по ключу `trace-<index>`; останавливает и прикладывает к Allure `SessionExtension.afterTestExecution`, а не `close()` фикстуры (Store закрывается после завершения теста в Allure); у зелёного теста trace-файл не сохраняется.
 
 **Слои.** В jupiter нет SQL и локаторов; в data нет JUnit, SQL только в data/db, db не зависит от data; в test нет локаторов и SQL.
 
