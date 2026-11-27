@@ -34,7 +34,7 @@ public final class UserWithOutcomeInvitationsFixture implements UserFixture {
     TestUser base = origin.user();
     List<ProfileFixture> invitees = new ArrayList<>();
     tearDown = new TearDown()
-        .with(() -> Friendships.of(base).deleteInvitations())
+        .with(() -> Friendships.of(base).delete())
         .with(() -> {
           for (int i = invitees.size() - 1; i >= 0; i--) {
             invitees.get(i).close();

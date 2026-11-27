@@ -2,17 +2,13 @@ package io.student.rangiffler.test;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
-import io.student.rangiffler.config.TestConfig;
 import io.student.rangiffler.jupiter.extension.BrowserLifecycleExtension;
 import io.student.rangiffler.jupiter.extension.BrowserTimeoutExtension;
 import io.student.rangiffler.jupiter.extension.user.UserExtension;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.util.Locale;
 
 /**
  * Базовый UI-тест: поля браузера и вкладки {@link Page}.
@@ -21,8 +17,6 @@ import java.util.Locale;
 @Tag("ui")
 @ExtendWith({UserExtension.class, BrowserLifecycleExtension.class, BrowserTimeoutExtension.class})
 public abstract class BaseUiTest {
-
-  private static final TestConfig CFG = TestConfig.getInstance();
 
   protected Playwright playwright;
   protected Browser browser;
@@ -41,18 +35,16 @@ public abstract class BaseUiTest {
     return context;
   }
 
-  public final void startBrowser() {
-    playwright = Playwright.create();
-    playwright.selectors().setTestIdAttribute("data-test-id");
-    browser = browserType().launch(
-        new BrowserType.LaunchOptions()
-            .setHeadless(CFG.headless())
-    );
-    context = browser.newContext(
-        new Browser.NewContextOptions()
-            .setViewportSize(CFG.viewportWidth(), CFG.viewportHeight())
-    );
-    page = context.newPage();
+  public final void bindBrowser(
+      Playwright playwright,
+      Browser browser,
+      BrowserContext context,
+      Page page
+  ) {
+    this.playwright = playwright;
+    this.browser = browser;
+    this.context = context;
+    this.page = page;
   }
 
   public final void stopBrowser() {
@@ -69,13 +61,5 @@ public abstract class BaseUiTest {
       playwright.close();
       playwright = null;
     }
-  }
-
-  private BrowserType browserType() {
-    return switch (CFG.browser().toLowerCase(Locale.ROOT)) {
-      case "firefox" -> playwright.firefox();
-      case "webkit" -> playwright.webkit();
-      default -> playwright.chromium();
-    };
   }
 }
