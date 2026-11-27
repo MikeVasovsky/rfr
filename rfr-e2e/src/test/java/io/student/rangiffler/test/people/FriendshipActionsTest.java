@@ -76,7 +76,7 @@ class FriendshipActionsTest extends BaseUiTest {
     PeopleLogin.open(page, invitee)
         .openTab(PeopleTab.INCOME_INVITATIONS)
         .table()
-        .checkThatPeople(List.of(alice.user().username()));
+        .checkThatEmpty();
   }
 
   @Test
