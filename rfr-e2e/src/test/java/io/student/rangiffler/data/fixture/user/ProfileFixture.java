@@ -1,5 +1,6 @@
 package io.student.rangiffler.data.fixture.user;
 
+import io.student.rangiffler.data.db.AuthAccount;
 import io.student.rangiffler.data.db.Profile;
 import io.student.rangiffler.data.fixture.TearDown;
 import io.student.rangiffler.model.TestProfile;
@@ -8,7 +9,8 @@ import io.student.rangiffler.utils.RandomDataUtils;
 
 /**
  * Владелец api-профиля: {@link #ensureFor} для уже существующего пользователя,
- * {@link #createRelated} — новый партнёр с профилем; {@link #close()} удаляет только свой профиль.
+ * {@link #createRelated} — новый партнёр с auth+профилем (можно логинить в UI);
+ * {@link #close()} удаляет профиль и auth-учётку.
  */
 public final class ProfileFixture implements AutoCloseable {
 
@@ -30,9 +32,12 @@ public final class ProfileFixture implements AutoCloseable {
 
   public static ProfileFixture createRelated() {
     TestUser user = RandomDataUtils.createUser();
+    AuthAccount account = AuthAccount.create(user);
     TestProfile profile = RandomDataUtils.createProfile();
     Profile handle = Profile.create(user, profile);
-    return new ProfileFixture(handle, new TearDown().with(() -> handle.delete()));
+    return new ProfileFixture(handle, new TearDown()
+        .with(handle::delete)
+        .with(account::delete));
   }
 
   public TestUser user() {

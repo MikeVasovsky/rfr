@@ -67,6 +67,19 @@ class FriendshipActionsTest extends BaseUiTest {
   }
 
   @Test
+  @DisplayName("Отменённая исходящая заявка пропадает у адресата во входящих")
+  void cancelledInvitationLeavesAddressee(Page page, @Session @User(outcomeInvitations = 1) UserSession alice) {
+    TestUser invitee = alice.user().outcomeInvitations().getFirst();
+    PeoplePage people = alice.mainPage().clickPeople().openTab(PeopleTab.OUTCOME_INVITATIONS);
+    people.table().row(invitee.username()).clickCancel();
+    people.checkThatNotification(Notification.INVITATION_CANCELLED);
+    PeopleLogin.open(page, invitee)
+        .openTab(PeopleTab.INCOME_INVITATIONS)
+        .table()
+        .checkThatEmpty();
+  }
+
+  @Test
   @DisplayName("Дружба, удалённая отправителем, пропадает у адресата")
   void friendRemovedByRequesterDisappearsForAddressee(Page page, @Session @User(friends = 1) UserSession alice) {
     TestUser friend = alice.user().friends().getFirst();
